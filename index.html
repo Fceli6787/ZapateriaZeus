@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Normalización de BD • Zapatería (1FN → 3FN)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50:'#eef6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a' }
+          },
+          boxShadow: { soft: '0 10px 25px -8px rgba(2,6,23,.15)' },
+          keyframes: {
+            'fade-up': { '0%':{opacity:'0',transform:'translateY(8px) scale(.98)'}, '100%':{opacity:'1',transform:'translateY(0) scale(1)'} },
+            'pulse-soft': { '0%,100%':{boxShadow:'0 0 0 0 rgba(59,130,246,.35)'}, '50%':{boxShadow:'0 0 0 12px rgba(59,130,246,.0)'} }
+          },
+          animation: { 'fade-up':'fade-up .45s cubic-bezier(.2,.8,.2,1)','pulse-soft':'pulse-soft 1.6s ease-out infinite' }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+    .tab-active{background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(244,247,254,.85));box-shadow:inset 0 0 0 1px rgba(37,99,235,.25),0 6px 18px -8px rgba(2,6,23,.25)}
+    .grid-auto-fit{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+    code::-webkit-scrollbar, pre::-webkit-scrollbar{height:8px}
+    code::-webkit-scrollbar-thumb, pre::-webkit-scrollbar-thumb{background:#c7d2fe;border-radius:999px}
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800">
+  <header class="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200/70">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="size-10 rounded-xl bg-brand-600 text-white grid place-content-center shadow-soft">👟</div>
+        <div>
+          <h1 class="text-lg sm:text-2xl font-bold tracking-tight">Normalización de Bases de Datos — Caso: Zapatería</h1>
+          <p class="text-slate-600 text-xs sm:text-sm mt-1">Autores: <strong>Maria Camila Murcia Bernal</strong> (ID: 891706) y <strong>Andres Felipe Celi Jimenez</strong> (ID: 886628) • Materia: <strong>Arquitectura de Datos</strong> • NRC: <strong>80131</strong></p>
+        </div>
+      </div>
+      <div class="ml-auto flex items-center flex-wrap gap-2">
+        <label for="voice-select" class="sr-only">Voz</label>
+        <select id="voice-select" class="rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm shadow-soft min-w-[180px]" title="Selecciona la voz">
+          <option value="">Voz (auto)</option>
+        </select>
+        <button id="btn-voice" class="rounded-lg bg-brand-600 text-white px-3 py-2 text-sm hover:bg-brand-700 active:scale-[.98] shadow-soft">🔊 Explicación con voz</button>
+        <button id="btn-stop-voice" class="rounded-lg bg-slate-900 text-white px-3 py-2 text-sm hover:bg-slate-800 active:scale-[.98] shadow-soft">⏹️ Detener</button>
+        <button id="btn-sql" class="rounded-lg bg-white px-3 py-2 text-sm border border-slate-200 hover:bg-slate-50 active:scale-[.98] shadow-soft">🧩 Ver SQL de la BD</button>
+      </div>
+    </div>
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 pb-3">
+      <div class="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+        <button data-tab="original" class="tab-btn tab-active rounded-xl px-4 py-2 text-sm font-medium border border-slate-200">Tabla Original</button>
+        <button data-tab="1fn" class="tab-btn rounded-xl px-4 py-2 text-sm font-medium border border-slate-200">Primera Forma Normal (1FN)</button>
+        <button data-tab="2fn" class="tab-btn rounded-xl px-4 py-2 text-sm font-medium border border-slate-200">Segunda Forma Normal (2FN)</button>
+        <button data-tab="3fn" class="tab-btn rounded-xl px-4 py-2 text-sm font-medium border border-slate-200">Tercera Forma Normal (3FN)</button>
+        <button data-tab="erd" class="tab-btn rounded-xl px-4 py-2 text-sm font-medium border border-slate-200">Diagrama Final</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-20 space-y-8">
+    <!-- ORIGINAL -->
+    <section id="panel-original" class="panel animate-fade-up">
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="md:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-soft p-4 sm:p-6">
+          <h2 class="text-xl font-bold mb-3">Tabla Original (ventas consolidadas)</h2>
+          <p class="text-slate-600 mb-4">Hoja de ventas con <span class="font-semibold">productos listados en una sola celda</span> por factura (viola 1FN). Las columnas repiten datos de cliente, empleado y sucursal en cada fila.</p>
+          <div class="overflow-auto rounded-xl border border-slate-200">
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-100 text-slate-700">
+                <tr>
+                  <th class="px-4 py-2 text-left">Factura</th>
+                  <th class="px-4 py-2 text-left">Fecha</th>
+                  <th class="px-4 py-2 text-left">Cliente (Apellidos, Nombres)</th>
+                  <th class="px-4 py-2 text-left">Empleado (Nombres Apellidos)</th>
+                  <th class="px-4 py-2 text-left">Sucursal</th>
+                  <th class="px-4 py-2 text-left">Productos (SKU:talla:color:precio:cantidad | ...)</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-original" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+        <aside class="bg-brand-50 rounded-2xl border border-brand-200 shadow-soft p-4 sm:p-6">
+          <h3 class="font-semibold text-brand-900">Objetivo</h3>
+          <div data-role="explanation" class="text-sm text-brand-900/80 mt-2 space-y-2">
+            <p>Partimos de una hoja de cálculo típica. Corregiremos datos no atómicos (1FN), dependencias parciales (2FN) y transitivas (3FN) hasta llegar a un diseño robusto como el del esquema de Zapatería.</p>
+            <ul class="list-disc pl-5">
+              <li>1FN: dividir productos en filas.</li>
+              <li>2FN: separar cabecera de factura de su detalle.</li>
+              <li>3FN: usar tablas maestras (Cliente, Empleado, Sucursal, Referencias) y claves foráneas.</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 1FN -->
+    <section id="panel-1fn" class="panel hidden animate-fade-up">
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="md:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-soft p-4 sm:p-6">
+          <h2 class="text-xl font-bold mb-3">Primera Forma Normal (1FN)</h2>
+          <p class="text-slate-600 mb-4">Cada producto pasa a una fila. La clave es compuesta <code>(factura, item)</code>. Aún hay datos que dependen solo de la factura (cliente, empleado, sucursal).</p>
+          <div class="overflow-auto rounded-xl border border-slate-200">
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-100 text-slate-700">
+                <tr>
+                  <th class="px-4 py-2 text-left">Factura</th>
+                  <th class="px-4 py-2 text-left">Item</th>
+                  <th class="px-4 py-2 text-left">SKU</th>
+                  <th class="px-4 py-2 text-left">Talla</th>
+                  <th class="px-4 py-2 text-left">Color</th>
+                  <th class="px-4 py-2 text-left">Precio</th>
+                  <th class="px-4 py-2 text-left">Cantidad</th>
+                  <th class="px-4 py-2 text-left">Cliente</th>
+                  <th class="px-4 py-2 text-left">Empleado</th>
+                  <th class="px-4 py-2 text-left">Sucursal</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-1fn" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+        <aside class="bg-brand-50 rounded-2xl border border-brand-200 shadow-soft p-4 sm:p-6">
+          <h3 class="font-semibold text-brand-900">¿Qué se corrigió?</h3>
+          <div data-role="explanation" class="text-sm text-brand-900/80 mt-2 space-y-2">
+            <p>Los datos son atómicos: no hay listas en celdas. Sin embargo, <em>Cliente</em>, <em>Empleado</em> y <em>Sucursal</em> dependen solo de <strong>Factura</strong> (dependencia parcial). Lo arreglamos en 2FN.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 2FN -->
+    <section id="panel-2fn" class="panel hidden animate-fade-up">
+      <div class="grid gap-6">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-soft p-4 sm:p-6">
+          <h2 class="text-xl font-bold mb-3">Segunda Forma Normal (2FN)</h2>
+          <p class="text-slate-600 mb-4">Separamos cabecera y detalle para eliminar dependencias parciales:</p>
+          <ul class="list-disc pl-5 text-slate-700 text-sm mb-4">
+            <li><strong>Factura</strong>(<code>id_factura PK</code>, fecha_hora, cliente, empleado, sucursal)</li>
+            <li><strong>DetalleFactura</strong>(<code>id_factura FK</code>, item, sku, talla, color, precio_unidad, cantidad)</li>
+          </ul>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <h3 class="font-semibold">Tabla: Factura (cabecera)</h3>
+              <div class="overflow-auto rounded-xl border border-slate-200 mt-2">
+                <table class="min-w-full text-sm">
+                  <thead class="bg-slate-100 text-slate-700">
+                    <tr>
+                      <th class="px-4 py-2 text-left">id_factura</th>
+                      <th class="px-4 py-2 text-left">fecha_hora</th>
+                      <th class="px-4 py-2 text-left">cliente</th>
+                      <th class="px-4 py-2 text-left">empleado</th>
+                      <th class="px-4 py-2 text-left">sucursal</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-2fn-a" class="divide-y divide-slate-100"></tbody>
+                </table>
+              </div>
+            </div>
+            <div>
+              <h3 class="font-semibold">Tabla: DetalleFactura</h3>
+              <div class="overflow-auto rounded-xl border border-slate-200 mt-2">
+                <table class="min-w-full text-sm">
+                  <thead class="bg-slate-100 text-slate-700">
+                    <tr>
+                      <th class="px-4 py-2 text-left">id_factura</th>
+                      <th class="px-4 py-2 text-left">item</th>
+                      <th class="px-4 py-2 text-left">sku</th>
+                      <th class="px-4 py-2 text-left">talla</th>
+                      <th class="px-4 py-2 text-left">color</th>
+                      <th class="px-4 py-2 text-left">precio_unidad</th>
+                      <th class="px-4 py-2 text-left">cantidad</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-2fn-b" class="divide-y divide-slate-100"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside class="bg-brand-50 rounded-2xl border border-brand-200 shadow-soft p-4 sm:p-6">
+          <h3 class="font-semibold text-brand-900">¿Qué mejoró?</h3>
+          <div data-role="explanation" class="text-sm text-brand-900/80 mt-2 space-y-2">
+            <p>El detalle solo guarda información por ítem; los datos de cabecera viven en <em>Factura</em>. Se evita actualizar cliente/empleado/sucursal repetidamente por cada producto.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 3FN -->
+    <section id="panel-3fn" class="panel hidden animate-fade-up">
+      <div class="grid gap-6">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-soft p-4 sm:p-6">
+          <h2 class="text-xl font-bold mb-3">Tercera Forma Normal (3FN)</h2>
+          <p class="text-slate-600 mb-4">Creamos entidades maestras y claves foráneas, alineadas con el <strong>esquema Zapatería</strong>: Cliente, Empleado, Sucursal, ReferenciaProducto, Inventario, Factura, DetalleFactura, Pago (opcional).</p>
+          <div class="grid lg:grid-cols-2 gap-6">
+            <div class="space-y-6">
+              <div>
+                <h3 class="font-semibold">Cliente</h3>
+                <div class="overflow-auto rounded-xl border border-slate-200 mt-2">
+                  <table class="min-w-full text-sm">
+                    <thead class="bg-slate-100 text-slate-700">
+                      <tr>
+                        <th class="px-4 py-2 text-left">id_cliente</th>
+                        <th class="px-4 py-2 text-left">apellidos</th>
+                        <th class="px-4 py-2 text-left">nombres</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-3fn-clientes" class="divide-y divide-slate-100"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div>
+                <h3 class="font-semibold">Empleado</h3>
+                <div class="overflow-auto rounded-xl border border-slate-200 mt-2">
+                  <table class="min-w-full text-sm">
+                    <thead class="bg-slate-100 text-slate-700">
+                      <tr>
+                        <th class="px-4 py-2 text-left">id_empleado</th>
+                        <th class="px-4 py-2 text-left">nombres</th>
+                        <th class="px-4 py-2 text-left">apellidos</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-3fn-empleados" class="divide-y divide-slate-100"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div>
+                <h3 class="font-semibold">Sucursal</h3>
+                <div class="overflow-auto rounded-xl border border-slate-200 mt-2">
+                  <table class="min-w-full text-sm">
+                    <thead class="bg-slate-100 text-slate-700">
+                      <tr>
+                        <th class="px-4 py-2 text-left">id_sucursal</th>
+                        <th class="px-4 py-2 text-left">nombre</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-3fn-sucursales" class="divide-y divide-slate-100"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="space-y-6">
+              <div>
+                <h3 class="font-semibold">ReferenciaProducto</h3>
+                <div class="overflow-auto rounded-xl border border-slate-200 mt-2">
+                  <table class="min-w-full text-sm">
+                    <thead class="bg-slate-100 text-slate-700">
+                      <tr>
+                        <th class="px-4 py-2 text-left">id_referencia</th>
+                        <th class="px-4 py-2 text-left">sku</th>
+                        <th class="px-4 py-2 text-left">talla</th>
+                        <th class="px-4 py-2 text-left">color</th>
+                        <th class="px-4 py-2 text-left">precio</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-3fn-referencias" class="divide-y divide-slate-100"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div>
+                <h3 class="font-semibold">Factura (FK a Cliente, Empleado, Sucursal)</h3>
+                <div class="overflow-auto rounded-xl border border-slate-200 mt-2">
+                  <table class="min-w-full text-sm">
+                    <thead class="bg-slate-100 text-slate-700">
+                      <tr>
+                        <th class="px-4 py-2 text-left">id_factura</th>
+                        <th class="px-4 py-2 text-left">fecha_hora</th>
+                        <th class="px-4 py-2 text-left">id_cliente</th>
+                        <th class="px-4 py-2 text-left">id_empleado</th>
+                        <th class="px-4 py-2 text-left">id_sucursal</th>
+                        <th class="px-4 py-2 text-left">total</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-3fn-facturas" class="divide-y divide-slate-100"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div>
+                <h3 class="font-semibold">DetalleFactura (FK a Factura y Referencia)</h3>
+                <div class="overflow-auto rounded-xl border border-slate-200 mt-2">
+                  <table class="min-w-full text-sm">
+                    <thead class="bg-slate-100 text-slate-700">
+                      <tr>
+                        <th class="px-4 py-2 text-left">id_factura</th>
+                        <th class="px-4 py-2 text-left">item</th>
+                        <th class="px-4 py-2 text-left">id_referencia</th>
+                        <th class="px-4 py-2 text-left">cantidad</th>
+                        <th class="px-4 py-2 text-left">valor_unitario</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-3fn-detalle" class="divide-y divide-slate-100"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside class="bg-brand-50 rounded-2xl border border-brand-200 shadow-soft p-4 sm:p-6">
+          <h3 class="font-semibold text-brand-900">Resultado</h3>
+          <div data-role="explanation" class="text-sm text-brand-900/80 mt-2 space-y-2">
+            <p>El diseño 3FN coincide con el <em>modelo Zapatería</em>: datos maestros en sus tablas, y transacciones en <strong>Factura</strong> y <strong>DetalleFactura</strong>. Reglas de negocio (inventario, pagos, etc.) se integran mediante claves foráneas.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ERD -->
+    <section id="panel-erd" class="panel hidden animate-fade-up">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-soft p-4 sm:p-6">
+        <h2 class="text-xl font-bold mb-4">Diagrama Final (Imagen ERD)</h2>
+        
+          <div class="border border-slate-200 rounded-2xl p-3 bg-slate-50">
+            <img id="erd-img" src="erd zapateria.jpg" alt="Diagrama ERD de la Zapatería" class="mx-auto rounded-xl shadow-soft border border-blue-200 max-h-[70vh] object-contain cursor-zoom-in" />
+          </div>
+
+          <!-- ERD Zoom Modal -->
+          <div id="erd-modal" class="fixed inset-0 hidden items-center justify-center z-50">
+            <div class="absolute inset-0 bg-slate-900/70" id="erd-modal-backdrop"></div>
+            <div class="relative w-[90vw] h-[90vh] max-w-5xl max-h-[90vh] bg-transparent">
+              <div class="absolute top-3 right-3 flex gap-2">
+                <button id="erd-zoom-in" class="rounded-lg bg-white px-3 py-2 text-sm border">+</button>
+                <button id="erd-zoom-out" class="rounded-lg bg-white px-3 py-2 text-sm border">−</button>
+                <button id="erd-zoom-fit" class="rounded-lg bg-white px-3 py-2 text-sm border">Fit</button>
+                <button id="erd-modal-close" class="rounded-lg bg-white px-3 py-2 text-sm border">Cerrar</button>
+              </div>
+              <div id="erd-zoom-container" class="w-full h-full flex items-center justify-center overflow-hidden rounded-xl">
+                <img id="erd-img-large" src="erd zapateria.jpg" alt="ERD ampliado" class="max-w-none max-h-none" style="transform:scale(1); transition:transform .12s; cursor:grab;" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <aside class="bg-brand-50 rounded-2xl border border-brand-200 shadow-soft p-4 sm:p-6 mt-6">
+        <h3 class="font-semibold text-brand-900">Lectura rápida del ERD</h3>
+        <div data-role="explanation" class="text-sm text-brand-900/80 mt-2 space-y-2">
+          <p><strong>Factura</strong> referencia a Cliente, Empleado y Sucursal. <strong>DetalleFactura</strong> referencia a Factura y a <em>ReferenciaProducto</em>, que a su vez referencia a <em>Producto</em> y éste a <em>Marca</em> y <em>Categoria</em>. <em>Inventario</em> controla el stock por referencia y <em>Pago</em> enlaza con Factura.</p>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <!-- SQL Modal -->
+  <div id="sql-modal" class="fixed inset-0 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-slate-900/60"></div>
+    <div class="relative bg-white w-[min(92vw,1100px)] max-h-[85vh] rounded-2xl border border-slate-200 shadow-soft p-4 sm:p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="size-9 rounded-lg bg-brand-600 text-white grid place-content-center">🧩</div>
+        <h3 class="text-lg font-semibold">SQL del esquema “Zapatería”</h3>
+        <button id="btn-close-sql" class="ml-auto rounded-lg bg-slate-900 text-white px-3 py-1.5 text-sm hover:bg-slate-800">Cerrar</button>
+      </div>
+      <p class="text-slate-600 text-sm mb-3">Script completo provisto. Puedes copiarlo o descargarlo en <code>zapateria.sql</code>.</p>
+      <div class="flex gap-2 mb-3">
+        <button id="btn-copy-sql" class="rounded-lg bg-brand-600 text-white px-3 py-2 text-sm hover:bg-brand-700">Copiar SQL</button>
+        <button id="btn-download-sql" class="rounded-lg bg-white px-3 py-2 text-sm border border-slate-200 hover:bg-slate-50">Descargar .sql</button>
+      </div>
+      <div class="overflow-auto rounded-xl border border-slate-200 max-h-[60vh]">
+        <pre class="text-xs p-4 bg-slate-50"><code id="code-sql"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <footer class="border-t border-slate-200/70 bg-white/70 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-sm text-slate-600">
+      <span>© <span id="year"></span> Normalización 1FN–3FN • Caso Zapatería.</span>
+      <span class="hidden sm:inline">•</span>
+      <span>Activa la voz 🔊 para escuchar el resumen de cada sección.</span>
+    </div>
+  </footer>
+
+  <script>
+    const $ = (q, el=document)=> el.querySelector(q);
+    const $$ = (q, el=document)=> [...el.querySelectorAll(q)];
+
+    // === Datos base: ventas consolidadas (violando 1FN) ===
+    // productos: "SKU:talla:color:precio:cantidad | ..."
+    const originalRows = [
+      { factura:'F-1001', fecha:'2025-08-01 10:32', cliA:'Celi Jiménez', cliN:'Andrés Felipe', empN:'María', empA:'Gómez', suc:'Centro', productos:'SKU-ABC-001:38:Negro:159000:2 | SKU-XYZ-110:40:Blanco:199000:1' },
+      { factura:'F-1002', fecha:'2025-08-02 16:10', cliA:'Ramírez Pérez', cliN:'Claudia',      empN:'Carlos', empA:'Rubiano', suc:'Norte',  productos:'SKU-ABC-001:39:Negro:159000:1 | SKU-FFF-210:37:Rojo:129000:2' },
+      { factura:'F-1003', fecha:'2025-08-03 11:05', cliA:'Kent',          cliN:'Clark',        empN:'Alex',   empA:'Arce',    suc:'Centro', productos:'SKU-XYZ-110:40:Blanco:199000:2' },
+      { factura:'F-1004', fecha:'2025-08-04 09:20', cliA:'Pineda',        cliN:'Leonardo',     empN:'Luis',   empA:'Sánchez', suc:'Sur',    productos:'SKU-AAA-777:42:Azul:179000:1 | SKU-XYZ-110:41:Blanco:199000:1' }
+    ];
+
+    function renderBody(tbody, rows, columns){
+      tbody.innerHTML='';
+      rows.forEach(r=>{
+        const tr=document.createElement('tr'); tr.className='hover:bg-slate-50/80';
+        columns.forEach(c=>{ const td=document.createElement('td'); td.className='px-4 py-2 whitespace-nowrap'; td.textContent = r[c] ?? ''; tr.appendChild(td); });
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderOriginal(){
+      const rows = originalRows.map(r=>({
+        factura:r.factura, fecha:r.fecha,
+        cliente:`${r.cliA}, ${r.cliN}`, empleado:`${r.empN} ${r.empA}`, sucursal:r.suc, productos:r.productos
+      }));
+      renderBody($('#tbody-original'), rows, ['factura','fecha','cliente','empleado','sucursal','productos']);
+    }
+
+    // === 1FN ===
+    function parseProductos(s){
+      return String(s).split('|').map(x=>x.trim()).filter(Boolean).map((t,i)=>{
+        const [sku,talla,color,precio,cantidad] = t.split(':').map(x=>x.trim());
+        return { item:i+1, sku, talla, color, precio:Number(precio), cantidad:Number(cantidad) };
+      });
+    }
+    function to1FN(rows){
+      const out=[];
+      for(const r of rows){
+        const items=parseProductos(r.productos);
+        for(const it of items){
+          out.push({ factura:r.factura, item:it.item, sku:it.sku, talla:it.talla, color:it.color, precio:it.precio, cantidad:it.cantidad,
+            cliente:`${r.cliA}, ${r.cliN}`, empleado:`${r.empN} ${r.empA}`, sucursal:r.suc });
+        }
+      }
+      return out;
+    }
+    function render1FN(){
+      renderBody($('#tbody-1fn'), to1FN(originalRows), ['factura','item','sku','talla','color','precio','cantidad','cliente','empleado','sucursal']);
+    }
+
+    // === 2FN ===
+    function to2FN(rows1){
+      const cab=new Map(); const det=[]; const itemCounters={};
+      for(const r of rows1){
+        if(!cab.has(r.factura)) cab.set(r.factura,{ id_factura:r.factura, fecha_hora: originalRows.find(x=>x.factura===r.factura).fecha, cliente:r.cliente, empleado:r.empleado, sucursal:r.sucursal });
+        if(!itemCounters[r.factura]) itemCounters[r.factura]=0; itemCounters[r.factura]++;
+        det.push({ id_factura:r.factura, item:itemCounters[r.factura], sku:r.sku, talla:r.talla, color:r.color, precio_unidad:r.precio, cantidad:r.cantidad });
+      }
+      return { factura:[...cab.values()], detalle:det };
+    }
+    function render2FN(){
+      const rows1 = to1FN(originalRows);
+      const { factura, detalle } = to2FN(rows1);
+      renderBody($('#tbody-2fn-a'), factura, ['id_factura','fecha_hora','cliente','empleado','sucursal']);
+      renderBody($('#tbody-2fn-b'), detalle, ['id_factura','item','sku','talla','color','precio_unidad','cantidad']);
+    }
+
+    // === 3FN (alineado a tablas del esquema) ===
+    function to3FN(rows1){
+      const uniq = arr => [...new Set(arr)];
+      const clients = uniq(rows1.map(r=>`${r.cliente}`));
+      const empleados = uniq(rows1.map(r=>`${r.empleado}`));
+      const sucursales = uniq(rows1.map(r=>`${r.sucursal}`));
+      const refs = uniq(rows1.map(r=>`${r.sku}|${r.talla}|${r.color}|${r.precio}`));
+
+      const clientes = clients.map((n,i)=>{ const [apellidos, nombres]=n.split(',').map(x=>x.trim()); return { id_cliente:i+1, apellidos, nombres }; });
+      const empleadosTbl = empleados.map((n,i)=>{ const parts=n.split(' '); const nombres=parts.slice(0,-1).join(' ')||n; const apellidos=parts.slice(-1).join(' '); return { id_empleado:i+1, nombres, apellidos }; });
+      const sucTbl = sucursales.map((n,i)=>({ id_sucursal:i+1, nombre:n }));
+      const refTbl = refs.map((s,i)=>{ const [sku,talla,color,precio]=s.split('|'); return { id_referencia:i+1, sku, talla, color, precio:Number(precio) }; });
+
+      const idByCliente = Object.fromEntries(clientes.map(o=>[`${o.apellidos}, ${o.nombres}`, o.id_cliente]));
+      const idByEmpleado = Object.fromEntries(empleadosTbl.map(o=>[`${o.nombres} ${o.apellidos}`.trim(), o.id_empleado]));
+      const idBySucursal = Object.fromEntries(sucTbl.map(o=>[o.nombre, o.id_sucursal]));
+      const idByRef = Object.fromEntries(refTbl.map(o=>[o.sku+"|"+o.talla+"|"+o.color+"|"+o.precio, o.id_referencia]));
+
+      const facturasMap = new Map();
+      const detalle = [];
+      for(const r of rows1){
+        const key=r.factura;
+        const id_cliente=idByCliente[r.cliente];
+        const id_empleado=idByEmpleado[r.empleado];
+        const id_sucursal=idBySucursal[r.sucursal];
+        if(!facturasMap.has(key)) facturasMap.set(key,{ id_factura:key, fecha_hora: originalRows.find(x=>x.factura===key).fecha, id_cliente, id_empleado, id_sucursal, total:0 });
+        const refKey = `${r.sku}|${r.talla}|${r.color}|${r.precio}`;
+        const id_referencia=idByRef[refKey];
+        const item=(detalle.filter(d=>d.id_factura===key).length)+1;
+        detalle.push({ id_factura:key, item, id_referencia, cantidad:r.cantidad, valor_unitario:r.precio });
+        facturasMap.get(key).total += r.cantidad*r.precio;
+      }
+      const facturas = [...facturasMap.values()].map(f=>({ ...f, total: Number(f.total.toFixed(2)) }));
+      return { clientes, empleados:empleadosTbl, sucursales:sucTbl, referencias:refTbl, facturas, detalle };
+    }
+    function render3FN(){
+      const rows1 = to1FN(originalRows);
+      const { clientes, empleados, sucursales, referencias, facturas, detalle } = to3FN(rows1);
+      renderBody($('#tbody-3fn-clientes'), clientes, ['id_cliente','apellidos','nombres']);
+      renderBody($('#tbody-3fn-empleados'), empleados, ['id_empleado','nombres','apellidos']);
+      renderBody($('#tbody-3fn-sucursales'), sucursales, ['id_sucursal','nombre']);
+      renderBody($('#tbody-3fn-referencias'), referencias, ['id_referencia','sku','talla','color','precio']);
+      renderBody($('#tbody-3fn-facturas'), facturas, ['id_factura','fecha_hora','id_cliente','id_empleado','id_sucursal','total']);
+      renderBody($('#tbody-3fn-detalle'), detalle, ['id_factura','item','id_referencia','cantidad','valor_unitario']);
+    }
+
+    // === Tabs, Voz y ERD ===
+    function switchTo(tab){
+      $$('.tab-btn').forEach(b=> b.classList.toggle('tab-active', b.dataset.tab===tab));
+      $$('.panel').forEach(p=>{ if(p.id==='panel-'+tab){ p.classList.remove('hidden'); p.classList.add('animate-fade-up'); } else { p.classList.add('hidden'); p.classList.remove('animate-fade-up'); } });
+      if(voiceEnabled) speakCurrentSummary();
+      // ERD ahora es imagen: no se requieren conectores
+    }
+    let voiceEnabled = false;
+    let selectedVoice = null;
+
+    function getPreferredVoice(){
+      const voices = window.speechSynthesis.getVoices();
+      if(!voices.length) return null;
+      const prefs = [
+        v => v.lang?.toLowerCase().includes('es-419') && /google|microsoft/i.test(v.name),
+        v => v.lang?.toLowerCase().startsWith('es') && /google|microsoft|natural/i.test(v.name),
+        v => v.lang?.toLowerCase().startsWith('es')
+      ];
+      for(const rule of prefs){ const found = voices.find(rule); if(found) return found; }
+      return voices[0];
+    }
+
+    // --- Voz: helpers ---
+    function speakText(text){
+      try{
+        if(!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(String(text || ''));
+        u.lang = (selectedVoice && selectedVoice.lang) ? selectedVoice.lang : 'es-ES';
+        if(selectedVoice) u.voice = selectedVoice;
+        u.rate = 1;
+        window.speechSynthesis.speak(u);
+      }catch(e){ console.warn('TTS error', e); }
+    }
+
+    function speakCurrentSummary(){
+      if(!voiceEnabled) return;
+      // determinar pestaña activa
+      const activeTab = document.querySelector('.tab-active')?.dataset.tab || 'original';
+      let text = '';
+      const panel = document.getElementById('panel-'+activeTab);
+      if(panel){
+        const expl = panel.querySelector('[data-role="explanation"]');
+        if(expl) text = expl.innerText.trim();
+      }
+      if(!text){
+        const defaults = {
+          original: 'Tabla original con productos listados en una sola celda por factura, violando la primera forma normal.',
+          '1fn': 'Primera forma normal: cada producto ocupa su propia fila; la clave es factura y item.',
+          '2fn': 'Segunda forma normal: separada cabecera y detalle para eliminar dependencias parciales.',
+          '3fn': 'Tercera forma normal: tablas maestras y claves foraneas, normalizacion completa.',
+          erd: 'Diagrama final mostrando relaciones entre facturas, clientes, empleados, sucursales y referencias.'
+        };
+        text = defaults[activeTab] || 'Resumen no disponible.';
+      }
+      speakText(text);
+    }
+
+    // actualizar selectedVoice cuando el usuario elija en el select
+    document.addEventListener('change', (e)=>{
+      if(e.target && e.target.id==='voice-select'){
+        const name = e.target.value;
+        const v = window.speechSynthesis.getVoices().find(x=>x.name===name);
+        selectedVoice = v || getPreferredVoice();
+      }
+    });
+
+    function lineBetween(svg, fromEl, toEl){
+      const a=fromEl.getBoundingClientRect(); const b=toEl.getBoundingClientRect(); const s=svg.getBoundingClientRect();
+      const x1 = a.left + a.width/2 - s.left; const y1 = a.bottom - s.top;
+      const x2 = b.left + b.width/2 - s.left; const y2 = b.top - s.top;
+      const midY=(y1+y2)/2; const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d',`M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`);
+      path.setAttribute('fill','none'); path.setAttribute('stroke','rgba(37,99,235,.75)'); path.setAttribute('stroke-width','2'); path.setAttribute('vector-effect','non-scaling-stroke');
+      svg.appendChild(path);
+    }
+    function drawERDConnectors(){
+      const svg = $('#panel-erd svg'); svg.innerHTML='';
+      const edges = [
+        ['#box-factura','#box-cliente'],['#box-factura','#box-empleado'],['#box-factura','#box-sucursal'],
+        ['#box-detalle','#box-factura'],['#box-detalle','#box-referencia'],
+        ['#box-referencia','#box-producto'],
+        ['#box-producto','#box-marca'],['#box-producto','#box-categoria'],
+        ['#box-inventario','#box-referencia'],
+        ['#box-pago','#box-factura']
+      ];
+      edges.forEach(([a,b])=>{ const from=$(a), to=$(b); if(from&&to) lineBetween(svg, from, to); });
+    }
+
+    // === SQL modal (texto provisto) ===
+    const sqlText = `DROP SCHEMA IF EXISTS zapateria;\nCREATE SCHEMA zapateria DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\nUSE zapateria;\n\n-- =========================\n--  MAESTROS\n-- =========================\nCREATE TABLE Cliente (\n  id_cliente INT AUTO_INCREMENT PRIMARY KEY,\n  apellidos VARCHAR(120) NOT NULL,\n  nombres   VARCHAR(120) NOT NULL,\n  NIT       VARCHAR(30),\n  email     VARCHAR(120),\n  telefono  VARCHAR(30)\n) ENGINE=InnoDB;\n\nCREATE TABLE Sucursal (\n  id_sucursal INT AUTO_INCREMENT PRIMARY KEY,\n  nombre      VARCHAR(100) NOT NULL,\n  direccion   VARCHAR(200),\n  descripcion VARCHAR(200)\n) ENGINE=InnoDB;\n\nCREATE TABLE Empleado (\n  id_empleado INT AUTO_INCREMENT PRIMARY KEY,\n  nombres   VARCHAR(120) NOT NULL,\n  apellidos VARCHAR(120) NOT NULL,\n  PI        VARCHAR(30),\n  id_sucursal INT NOT NULL,\n  INDEX idx_emp_sucursal (id_sucursal),\n  CONSTRAINT fk_emp_sucursal\n    FOREIGN KEY (id_sucursal) REFERENCES Sucursal(id_sucursal)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n) ENGINE=InnoDB;\n\nCREATE TABLE Marca (\n  id_marca INT AUTO_INCREMENT PRIMARY KEY,\n  nombre   VARCHAR(80) NOT NULL\n) ENGINE=InnoDB;\n\nCREATE TABLE Categoria (\n  id_categoria INT AUTO_INCREMENT PRIMARY KEY,\n  nombre       VARCHAR(80) NOT NULL\n) ENGINE=InnoDB;\n\n-- Producto (modelo) y su variante (referencia)\nCREATE TABLE Producto (\n  id_producto  INT AUTO_INCREMENT PRIMARY KEY,\n  modelo       VARCHAR(120) NOT NULL,\n  genero       VARCHAR(15)  NOT NULL,         -- M / F / UNISEX (atómico)\n  descripcion  VARCHAR(255),\n  id_marca     INT NOT NULL,\n  id_categoria INT NOT NULL,\n  INDEX idx_prod_marca (id_marca),\n  INDEX idx_prod_categoria (id_categoria),\n  CONSTRAINT fk_prod_marca     FOREIGN KEY (id_marca)     REFERENCES Marca(id_marca)\n    ON UPDATE CASCADE ON DELETE RESTRICT,\n  CONSTRAINT fk_prod_categoria FOREIGN KEY (id_categoria) REFERENCES Categoria(id_categoria)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n) ENGINE=InnoDB;\n\nCREATE TABLE ReferenciaProducto (\n  id_referencia INT AUTO_INCREMENT PRIMARY KEY,\n  talla      VARCHAR(10) NOT NULL,\n  color      VARCHAR(30) NOT NULL,\n  sku        VARCHAR(60) NOT NULL,\n  precio     DECIMAL(12,2) NOT NULL,          -- precio de lista (no depende de otra no-clave)\n  estado     VARCHAR(12) NOT NULL DEFAULT 'ACTIVO',\n  id_producto INT NOT NULL,\n  UNIQUE KEY uk_ref_sku (sku),\n  INDEX idx_ref_prod (id_producto),\n  CONSTRAINT fk_ref_producto FOREIGN KEY (id_producto) REFERENCES Producto(id_producto)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n) ENGINE=InnoDB;\n\n-- =========================\n--  INVENTARIO (global por referencia, como en tu imagen #9)\n-- =========================\nCREATE TABLE Inventario (\n  id_inventario  INT AUTO_INCREMENT PRIMARY KEY,\n  id_referencia  INT NOT NULL,\n  cant_actual    INT NOT NULL DEFAULT 0,\n  cant_min       INT NOT NULL DEFAULT 0,\n  cant_max       INT NOT NULL DEFAULT 0,\n  INDEX idx_inv_ref (id_referencia),\n  CONSTRAINT fk_inv_ref FOREIGN KEY (id_referencia) REFERENCES ReferenciaProducto(id_referencia)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n) ENGINE=InnoDB;\n\n-- =========================\n--  VENTAS (imagen #1)\n-- =========================\nCREATE TABLE Factura (\n  id_factura  INT AUTO_INCREMENT PRIMARY KEY,\n  fecha_hora  DATETIME NOT NULL,\n  subtotal    DECIMAL(12,2) NOT NULL,\n  descuento   DECIMAL(12,2) NOT NULL DEFAULT 0,\n  impuesto    DECIMAL(12,2) NOT NULL,\n  total       DECIMAL(12,2) NOT NULL,\n  id_cliente  INT NOT NULL,\n  id_empleado INT NOT NULL,\n  id_sucursal INT NOT NULL,\n  INDEX idx_fact_cliente  (id_cliente),\n  INDEX idx_fact_empleado (id_empleado),\n  INDEX idx_fact_sucursal (id_sucursal),\n  CONSTRAINT fk_fact_cliente  FOREIGN KEY (id_cliente)  REFERENCES Cliente(id_cliente)\n    ON UPDATE CASCADE ON DELETE RESTRICT,\n  CONSTRAINT fk_fact_empleado FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado)\n    ON UPDATE CASCADE ON DELETE RESTRICT,\n  CONSTRAINT fk_fact_sucursal FOREIGN KEY (id_sucursal) REFERENCES Sucursal(id_sucursal)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n) ENGINE=InnoDB;\n\nCREATE TABLE DetalleFactura (\n  id_factura     INT NOT NULL,\n  item           INT NOT NULL,\n  id_referencia  INT NOT NULL,\n  cantidad       INT NOT NULL,\n  valor_unitario DECIMAL(12,2) NOT NULL,      -- valor de la transacción (congelado)\n  descuento_valor DECIMAL(12,2) NOT NULL DEFAULT 0,\n  valor_iva      DECIMAL(12,2) NOT NULL,\n  PRIMARY KEY (id_factura, item),\n  INDEX idx_detfac_ref (id_referencia),\n  CONSTRAINT fk_detfac_factura    FOREIGN KEY (id_factura)    REFERENCES Factura(id_factura)\n    ON UPDATE CASCADE ON DELETE CASCADE,\n  CONSTRAINT fk_detfac_referencia FOREIGN KEY (id_referencia) REFERENCES ReferenciaProducto(id_referencia)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n) ENGINE=InnoDB;\n\nCREATE TABLE Pago (\n  id_pago INT AUTO_INCREMENT PRIMARY KEY,\n  id_factura INT NOT NULL,\n  tipo_pago VARCHAR(20) NOT NULL,            -- EFECTIVO/TARJETA/TRANSFERENCIA/OTRO\n  monto DECIMAL(12,2) NOT NULL,\n  codigo_referencia VARCHAR(80),\n  INDEX idx_pago_factura (id_factura),\n  CONSTRAINT fk_pago_factura FOREIGN KEY (id_factura) REFERENCES Factura(id_factura)\n    ON UPDATE CASCADE ON DELETE CASCADE\n) ENGINE=InnoDB;\n\n-- =========================\n--  COMPRAS (imagen #12-14)\n-- =========================\nCREATE TABLE Proveedor (\n  id_proveedor INT AUTO_INCREMENT PRIMARY KEY,\n  primer_apellido  VARCHAR(60) NOT NULL,\n  segundo_apellido VARCHAR(60),\n  nombres          VARCHAR(120) NOT NULL,\n  NIT VARCHAR(30),\n  telefono VARCHAR(30),\n  email    VARCHAR(120)\n) ENGINE=InnoDB;\n\nCREATE TABLE CompraProducto (\n  id_compra    INT AUTO_INCREMENT PRIMARY KEY,\n  fecha_compra DATETIME NOT NULL,\n  subtotal     DECIMAL(12,2) NOT NULL,\n  impuesto     DECIMAL(12,2) NOT NULL,\n  total        DECIMAL(12,2) NOT NULL,\n  id_proveedor INT NOT NULL,\n  id_sucursal  INT NOT NULL,\n  INDEX idx_comp_proveedor (id_proveedor),\n  INDEX idx_comp_sucursal  (id_sucursal),\n  CONSTRAINT fk_comp_proveedor FOREIGN KEY (id_proveedor) REFERENCES Proveedor(id_proveedor)\n    ON UPDATE CASCADE ON DELETE RESTRICT,\n  CONSTRAINT fk_comp_sucursal  FOREIGN KEY (id_sucursal)  REFERENCES Sucursal(id_sucursal)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n) ENGINE=InnoDB;\n\nCREATE TABLE DetalleCompraProducto (\n  id_compra    INT NOT NULL,\n  item         INT NOT NULL,\n  id_referencia INT NOT NULL,\n  cantidad     INT NOT NULL,\n  precio_unidad DECIMAL(12,2) NOT NULL,\n  PRIMARY KEY (id_compra, item),\n  INDEX idx_detcomp_ref (id_referencia),\n  CONSTRAINT fk_detcomp_compra     FOREIGN KEY (id_compra)     REFERENCES CompraProducto(id_compra)\n    ON UPDATE CASCADE ON DELETE CASCADE,\n  CONSTRAINT fk_detcomp_referencia FOREIGN KEY (id_referencia) REFERENCES ReferenciaProducto(id_referencia)\n    ON UPDATE CASCADE ON DELETE RESTRICT\n) ENGINE=InnoDB;`;
+
+    function init(){
+      $('#year').textContent = new Date().getFullYear();
+      renderOriginal(); render1FN(); render2FN(); render3FN();
+      $$('.tab-btn').forEach(b=> b.addEventListener('click', ()=> switchTo(b.dataset.tab)));
+      $('#btn-voice').addEventListener('click', ()=>{ voiceEnabled=true; speakCurrentSummary(); });
+      $('#btn-stop-voice').addEventListener('click', ()=> window.speechSynthesis?.cancel());
+      $('#code-sql').textContent = sqlText;
+      $('#btn-sql').addEventListener('click', ()=> $('#sql-modal').classList.remove('hidden'));
+      $('#btn-close-sql').addEventListener('click', ()=> $('#sql-modal').classList.add('hidden'));
+      $('#btn-copy-sql').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(sqlText); alert('SQL copiado.'); } catch(e){ alert('No se pudo copiar.'); } });
+      $('#btn-download-sql').addEventListener('click', ()=>{ const blob=new Blob([sqlText],{type:'text/sql'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='zapateria.sql'; a.click(); URL.revokeObjectURL(url); });
+      const ro=new ResizeObserver(()=>{ if($('.tab-active')?.dataset.tab==='erd') drawERDConnectors(); }); ro.observe(document.body);
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      // estilos para ERD boxes
+      const boxes = [
+        ['box-factura', 'Factura'],
+        ['box-cliente', 'Cliente'],
+        ['box-empleado', 'Empleado'],
+        ['box-sucursal', 'Sucursal'],
+        ['box-detalle', 'DetalleFactura'],
+        ['box-referencia', 'ReferenciaProducto'],
+        ['box-producto', 'Producto'],
+        ['box-marca', 'Marca'],
+        ['box-categoria', 'Categoria'],
+        ['box-inventario', 'Inventario'],
+        ['box-pago', 'Pago']
+      ];
+
+  // Inicializar las voces cuando estén disponibles
+      window.speechSynthesis.onvoiceschanged = () => {
+        const voices = window.speechSynthesis.getVoices();
+        const select = $('#voice-select');
+        select.innerHTML = '<option value="">Voz (auto)</option>' + voices
+          .map(v => `<option value="${v.name}">${v.name} (${v.lang})</option>`)
+          .join('');
+        selectedVoice = getPreferredVoice();
+      };
+
+      // --- ERD modal & zoom/pan handlers ---
+      (function(){
+        const thumb = $('#erd-img');
+        const modal = $('#erd-modal');
+        const backdrop = $('#erd-modal-backdrop');
+        const imgLarge = $('#erd-img-large');
+        const container = $('#erd-zoom-container');
+        let scale = 1;
+        let originX = 0, originY = 0;
+        let isPanning = false, startX=0, startY=0, panX=0, panY=0;
+
+        function updateTransform(){
+          imgLarge.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+        }
+
+        function openModal(){ modal.classList.remove('hidden'); document.body.style.overflow='hidden'; imgLarge.style.transform='translate(0px,0px) scale(1)'; scale=1; panX=panY=0; updateTransform(); }
+        function closeModal(){ modal.classList.add('hidden'); document.body.style.overflow=''; }
+
+        if(thumb){ thumb.addEventListener('click', ()=> openModal()); }
+        if(backdrop) backdrop.addEventListener('click', ()=> closeModal());
+        const btnClose = $('#erd-modal-close'); if(btnClose) btnClose.addEventListener('click', ()=> closeModal());
+        const btnIn = $('#erd-zoom-in'); const btnOut = $('#erd-zoom-out'); const btnFit = $('#erd-zoom-fit');
+        if(btnIn) btnIn.addEventListener('click', ()=>{ scale = Math.min(4, scale + 0.25); updateTransform(); });
+        if(btnOut) btnOut.addEventListener('click', ()=>{ scale = Math.max(0.25, scale - 0.25); updateTransform(); });
+        if(btnFit) btnFit.addEventListener('click', ()=>{ scale = Math.min(1, Math.max(0.25, container.clientWidth / imgLarge.naturalWidth)); panX=panY=0; updateTransform(); });
+
+        // pan/drag
+        imgLarge.addEventListener('mousedown', (e)=>{ isPanning=true; imgLarge.style.cursor='grabbing'; startX=e.clientX; startY=e.clientY; });
+        document.addEventListener('mousemove', (e)=>{ if(!isPanning) return; panX += e.clientX - startX; panY += e.clientY - startY; startX = e.clientX; startY = e.clientY; updateTransform(); });
+        document.addEventListener('mouseup', ()=>{ if(isPanning){ isPanning=false; imgLarge.style.cursor='grab'; } });
+
+        // touch support
+        imgLarge.addEventListener('touchstart', (e)=>{ if(e.touches.length===1){ isPanning=true; startX=e.touches[0].clientX; startY=e.touches[0].clientY; } });
+        imgLarge.addEventListener('touchmove', (e)=>{ if(!isPanning) return; panX += e.touches[0].clientX - startX; panY += e.touches[0].clientY - startY; startX = e.touches[0].clientX; startY = e.touches[0].clientY; updateTransform(); e.preventDefault(); });
+        imgLarge.addEventListener('touchend', ()=>{ isPanning=false; });
+
+        // wheel zoom
+        container.addEventListener('wheel', (e)=>{ e.preventDefault(); const delta = e.deltaY > 0 ? -0.08 : 0.08; scale = Math.min(4, Math.max(0.25, scale + delta)); updateTransform(); });
+      })();
+
+      init();
+    });
+  </script>
+</body>
+</html>
