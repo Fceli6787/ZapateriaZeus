@@ -159,11 +159,16 @@
       border: 2px solid #000;
     }
     
-    button:not(.tab-btn):hover {
+    button:not(.tab-btn):hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
     }
     
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     #btn-voice {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       animation: bounce-slow 3s ease-in-out infinite;
@@ -174,6 +179,10 @@
     }
     
     /* Código más divertido */
+    pre {
+        position: relative; /* Añadido para posicionar el botón de copiar */
+    }
+
     pre code {
       background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
       padding: 1rem;
@@ -601,7 +610,7 @@
         </div>
         
         <div id="erd-viewport" class="h-[70vh] overflow-hidden cursor-grab active:cursor-grabbing rounded-xl shadow-pop">
-          <img id="erd-interactive-img" src="erd zapateria.jpg" alt="Diagrama ERD de la Zapatería" class="max-w-none max-h-none transition-transform duration-100" style="transform-origin: 0 0;" />
+          <img id="erd-interactive-img" src="img/erd zapateria.jpg" alt="Diagrama ERD de la Zapatería" class="max-w-none max-h-none transition-transform duration-100" style="transform-origin: 0 0;" />
         </div>
       </div>
       <aside class="aside-card rounded-2xl shadow-pop p-4 sm:p-6 mt-6">
@@ -630,7 +639,7 @@
 CREATE DATABASE TiendaZapatos;
 USE TiendaZapatos;</code></pre>
           <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-6">
-            <img src="creacion-bd.png" alt="Captura de la creación de la base de datos." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+            <img src="/img/creacion-bd.png" alt="Captura de la creación de la base de datos." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
             <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre de archivo: <strong>creacion-bd.png</strong>)</p>
             <p class="text-xs text-slate-500 mt-1">Fecha y hora de ejecución: <span class="font-mono">2025-08-27 10:45:15</span> (actualizar)</p>
           </div>
@@ -638,21 +647,37 @@ USE TiendaZapatos;</code></pre>
 
         <div id="sub-panel-impl-tables" class="sub-panel hidden space-y-6">
           <h3 class="font-bold text-lg">Paso 2: Crear la Estructura de Tablas</h3>
-          <p class="text-slate-700">A continuación, se ejecuta el script con todas las sentencias <code>CREATE TABLE</code>. Es importante definir correctamente las claves primarias (PK) y foráneas (FK), y respetar el orden de creación para que las dependencias se cumplan.</p>
-          <pre><code class="language-sql">-- ==========================
--- TABLA TIENDA
--- ==========================
-CREATE TABLE Tienda (
+          <p class="text-slate-700">A continuación, se presentan las sentencias <code>CREATE TABLE</code> para cada una de las tablas del modelo. Utiliza los botones para navegar entre las tablas como si fuera una presentación.</p>
+          
+          <div id="table-slideshow-container" class="relative mt-6">
+            <!-- Controles de Navegación del Slideshow -->
+            <div class="flex items-center justify-center gap-4 mb-4">
+              <button id="prev-table-btn" class="size-10 bg-white rounded-full grid place-content-center font-bold text-lg shadow-pop border-2 border-black">&lt;</button>
+              <span id="table-slide-counter" class="font-bold text-brand-700 text-lg px-4 py-2 bg-white rounded-xl border-2 border-black"></span>
+              <button id="next-table-btn" class="size-10 bg-white rounded-full grid place-content-center font-bold text-lg shadow-pop border-2 border-black">&gt;</button>
+            </div>
+
+            <!-- Contenedor de las "Diapositivas" -->
+            <div id="table-slides-wrapper">
+              <!-- Slide 1: Tienda -->
+              <div class="table-slide bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Tabla: Tienda</h4>
+                <pre><code class="language-sql">CREATE TABLE Tienda (
     idTienda INT AUTO_INCREMENT PRIMARY KEY,
     NombreTienda VARCHAR(45) NOT NULL,
     Direccion VARCHAR(100),
     Descripcion VARCHAR(100)
-);
+);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/creacion-tabla-tienda.png" alt="Captura de la creación de la tabla Tienda." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>creacion-tabla-tienda.png</strong>)</p>
+                </div>
+              </div>
 
--- ==========================
--- TABLA CLIENTE
--- ==========================
-CREATE TABLE Cliente (
+              <!-- Slide 2: Cliente -->
+              <div class="table-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Tabla: Cliente</h4>
+                <pre><code class="language-sql">CREATE TABLE Cliente (
     idCliente INT AUTO_INCREMENT PRIMARY KEY,
     Nombres VARCHAR(45) NOT NULL,
     PrimerApellido VARCHAR(45) NOT NULL,
@@ -660,12 +685,17 @@ CREATE TABLE Cliente (
     NIT VARCHAR(15) UNIQUE,
     Correo VARCHAR(45),
     Telefono VARCHAR(15)
-);
-
--- ==========================
--- TABLA EMPLEADO
--- ==========================
-CREATE TABLE Empleado (
+);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/creacion-tabla-cliente.png" alt="Captura de la creación de la tabla Cliente." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>creacion-tabla-cliente.png</strong>)</p>
+                </div>
+              </div>
+              
+              <!-- Slide 3: Empleado -->
+              <div class="table-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Tabla: Empleado</h4>
+                <pre><code class="language-sql">CREATE TABLE Empleado (
     idEmpleado INT AUTO_INCREMENT PRIMARY KEY,
     Nombres VARCHAR(45) NOT NULL,
     PrimerApellido VARCHAR(45) NOT NULL,
@@ -673,12 +703,17 @@ CREATE TABLE Empleado (
     RolEmpleado VARCHAR(45) NOT NULL,
     idTienda INT,
     FOREIGN KEY (idTienda) REFERENCES Tienda(idTienda)
-);
+);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/creacion-tabla-empleado.png" alt="Captura de la creación de la tabla Empleado." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>creacion-tabla-empleado.png</strong>)</p>
+                </div>
+              </div>
 
--- ==========================
--- TABLA PRODUCTO
--- ==========================
-CREATE TABLE Producto (
+              <!-- Slide 4: Producto -->
+              <div class="table-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Tabla: Producto</h4>
+                <pre><code class="language-sql">CREATE TABLE Producto (
     idProducto INT AUTO_INCREMENT PRIMARY KEY,
     NombreProducto VARCHAR(45) NOT NULL,
     Descripcion VARCHAR(100),
@@ -689,24 +724,34 @@ CREATE TABLE Producto (
     SKU VARCHAR(45) UNIQUE,
     Precio DECIMAL(10,2) NOT NULL,
     Estado VARCHAR(45) DEFAULT 'Activo'
-);
+);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/creacion-tabla-producto.png" alt="Captura de la creación de la tabla Producto." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>creacion-tabla-producto.png</strong>)</p>
+                </div>
+              </div>
 
--- ==========================
--- TABLA INVENTARIO
--- ==========================
-CREATE TABLE Inventario (
+              <!-- Slide 5: Inventario -->
+              <div class="table-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Tabla: Inventario</h4>
+                <pre><code class="language-sql">CREATE TABLE Inventario (
     idInventario INT AUTO_INCREMENT PRIMARY KEY,
     idTienda INT,
     idProducto INT,
     CantidadDisponible INT NOT NULL,
     FOREIGN KEY (idTienda) REFERENCES Tienda(idTienda),
     FOREIGN KEY (idProducto) REFERENCES Producto(idProducto)
-);
+);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/creacion-tabla-inventario.png" alt="Captura de la creación de la tabla Inventario." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>creacion-tabla-inventario.png</strong>)</p>
+                </div>
+              </div>
 
--- ==========================
--- TABLA PROVEEDOR
--- ==========================
-CREATE TABLE Proveedor (
+              <!-- Slide 6: Proveedor -->
+              <div class="table-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Tabla: Proveedor</h4>
+                <pre><code class="language-sql">CREATE TABLE Proveedor (
     idProveedor INT AUTO_INCREMENT PRIMARY KEY,
     Nombres VARCHAR(45) NOT NULL,
     PrimerApellido VARCHAR(45),
@@ -714,12 +759,17 @@ CREATE TABLE Proveedor (
     NIT VARCHAR(15) UNIQUE,
     Telefono VARCHAR(15),
     Correo VARCHAR(45)
-);
+);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/creacion-tabla-proveedor.png" alt="Captura de la creación de la tabla Proveedor." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>creacion-tabla-proveedor.png</strong>)</p>
+                </div>
+              </div>
 
--- ==========================
--- TABLA COMPRA PRODUCTO
--- ==========================
-CREATE TABLE CompraProducto (
+              <!-- Slide 7: CompraProducto -->
+              <div class="table-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Tabla: CompraProducto</h4>
+                <pre><code class="language-sql">CREATE TABLE CompraProducto (
     idCompraProducto INT AUTO_INCREMENT PRIMARY KEY,
     FechaCompra DATE NOT NULL,
     SubTotal DECIMAL(10,2),
@@ -729,12 +779,17 @@ CREATE TABLE CompraProducto (
     idProveedor INT,
     FOREIGN KEY (idTienda) REFERENCES Tienda(idTienda),
     FOREIGN KEY (idProveedor) REFERENCES Proveedor(idProveedor)
-);
+);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/creacion-tabla-compraproducto.png" alt="Captura de la creación de la tabla CompraProducto." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>creacion-tabla-compraproducto.png</strong>)</p>
+                </div>
+              </div>
 
--- ==========================
--- TABLA DETALLE COMPRA PRODUCTOS
--- ==========================
-CREATE TABLE DetalleCompraProductos (
+              <!-- Slide 8: DetalleCompraProductos -->
+              <div class="table-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Tabla: DetalleCompraProductos</h4>
+                <pre><code class="language-sql">CREATE TABLE DetalleCompraProductos (
     idDetalleCompraProductos INT AUTO_INCREMENT PRIMARY KEY,
     idCompraProducto INT,
     idProducto INT,
@@ -742,12 +797,17 @@ CREATE TABLE DetalleCompraProductos (
     PrecioUnidad DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (idCompraProducto) REFERENCES CompraProducto(idCompraProducto),
     FOREIGN KEY (idProducto) REFERENCES Producto(idProducto)
-);
-
--- ==========================
--- TABLA FACTURA
--- ==========================
-CREATE TABLE Factura (
+);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/creacion-tabla-detallecompra.png" alt="Captura de la creación de la tabla DetalleCompraProductos." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>creacion-tabla-detallecompra.png</strong>)</p>
+                </div>
+              </div>
+              
+              <!-- Slide 9: Factura -->
+              <div class="table-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Tabla: Factura</h4>
+                <pre><code class="language-sql">CREATE TABLE Factura (
     idFactura INT AUTO_INCREMENT PRIMARY KEY,
     FechaHora DATETIME NOT NULL,
     SubTotal DECIMAL(10,2) NOT NULL,
@@ -760,12 +820,17 @@ CREATE TABLE Factura (
     FOREIGN KEY (idEmpleado) REFERENCES Empleado(idEmpleado),
     FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente),
     FOREIGN KEY (idTienda) REFERENCES Tienda(idTienda)
-);
+);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/creacion-tabla-factura.png" alt="Captura de la creación de la tabla Factura." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>creacion-tabla-factura.png</strong>)</p>
+                </div>
+              </div>
 
--- ==========================
--- TABLA DETALLE FACTURA
--- ==========================
-CREATE TABLE DetalleFactura (
+              <!-- Slide 10: DetalleFactura -->
+              <div class="table-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Tabla: DetalleFactura</h4>
+                <pre><code class="language-sql">CREATE TABLE DetalleFactura (
     idDetalleFactura INT AUTO_INCREMENT PRIMARY KEY,
     idFactura INT,
     idProducto INT,
@@ -775,123 +840,192 @@ CREATE TABLE DetalleFactura (
     IVA DECIMAL(10,2) DEFAULT 0,
     FOREIGN KEY (idFactura) REFERENCES Factura(idFactura),
     FOREIGN KEY (idProducto) REFERENCES Producto(idProducto)
-);
+);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/creacion-tabla-detallefactura.png" alt="Captura de la creación de la tabla DetalleFactura." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>creacion-tabla-detallefactura.png</strong>)</p>
+                </div>
+              </div>
 
--- ==========================
--- TABLA PAGO
--- ==========================
-CREATE TABLE Pago (
+              <!-- Slide 11: Pago -->
+              <div class="table-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Tabla: Pago</h4>
+                <pre><code class="language-sql">CREATE TABLE Pago (
     idPago INT AUTO_INCREMENT PRIMARY KEY,
     Monto DECIMAL(10,2) NOT NULL,
     TipoPago VARCHAR(45) NOT NULL,
     idFactura INT,
     FOREIGN KEY (idFactura) REFERENCES Factura(idFactura)
-);
-</code></pre>
-          <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-6">
-            <img src="creacion-tablas.png" alt="Captura de las tablas creadas en el gestor de BD." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
-            <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre de archivo: <strong>creacion-tablas.png</strong>)</p>
-            <p class="text-xs text-slate-500 mt-1">Fecha y hora de ejecución: <span class="font-mono">2025-08-27 10:46:02</span> (actualizar)</p>
+);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/creacion-tabla-pago.png" alt="Captura de la creación de la tabla Pago." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>creacion-tabla-pago.png</strong>)</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         <div id="sub-panel-impl-inserts" class="sub-panel hidden space-y-6">
           <h3 class="font-bold text-lg">Paso 3: Poblar las Tablas con Datos</h3>
-          <p class="text-slate-700">Finalmente, se usan sentencias <code>INSERT INTO</code> para llenar las tablas. El orden es crucial: se debe insertar primero en las tablas que no tienen dependencias y luego en las que sí las tienen.</p>
-          <pre><code class="language-sql">-- =========================================
--- INSERTS PARA TABLA TIENDA
--- =========================================
-INSERT INTO Tienda (NombreTienda, Direccion, Descripcion) VALUES
+          <p class="text-slate-700">Finalmente, se usan sentencias <code>INSERT INTO</code> para llenar las tablas. El orden es crucial: se debe insertar primero en las tablas que no tienen dependencias y luego en las que sí las tienen. Navega por cada paso de la inserción.</p>
+          
+          <div id="insert-slideshow-container" class="relative mt-6">
+            <!-- Controles de Navegación -->
+            <div class="flex items-center justify-center gap-4 mb-4">
+              <button id="prev-insert-btn" class="size-10 bg-white rounded-full grid place-content-center font-bold text-lg shadow-pop border-2 border-black">&lt;</button>
+              <span id="insert-slide-counter" class="font-bold text-brand-700 text-lg px-4 py-2 bg-white rounded-xl border-2 border-black"></span>
+              <button id="next-insert-btn" class="size-10 bg-white rounded-full grid place-content-center font-bold text-lg shadow-pop border-2 border-black">&gt;</button>
+            </div>
+            
+            <!-- Contenedor de las "Diapositivas" de Inserción -->
+            <div id="insert-slides-wrapper">
+              <!-- Slide 1: Tienda -->
+              <div class="insert-slide bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Inserts: Tienda</h4>
+                <pre><code class="language-sql">INSERT INTO Tienda (NombreTienda, Direccion, Descripcion) VALUES
 ('Zapatería Central', 'Calle 10 #25-30, Bogotá', 'Sucursal principal en Bogotá'),
 ('Calzado Express', 'Carrera 45 #80-12, Medellín', 'Sucursal Medellín'),
-('Fashion Shoes', 'Av. Siempre Viva #123, Cali', 'Sucursal en Cali');
+('Fashion Shoes', 'Av. Siempre Viva #123, Cali', 'Sucursal en Cali');</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/insert-tienda.png" alt="Resultado de la inserción en la tabla Tienda." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>insert-tienda.png</strong>)</p>
+                </div>
+              </div>
 
--- =========================================
--- INSERTS PARA TABLA CLIENTE
--- =========================================
-INSERT INTO Cliente (Nombres, PrimerApellido, SegundoApellido, NIT, Correo, Telefono) VALUES
+              <!-- Slide 2: Cliente -->
+              <div class="insert-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Inserts: Cliente</h4>
+                <pre><code class="language-sql">INSERT INTO Cliente (Nombres, PrimerApellido, SegundoApellido, NIT, Correo, Telefono) VALUES
 ('Carlos', 'Gómez', 'Martínez', '900123456', 'carlos.gomez@example.com', '3001112233'),
 ('María', 'López', 'Fernández', '901234567', 'maria.lopez@example.com', '3102223344'),
-('Andrés', 'Pérez', 'Rodríguez', '902345678', 'andres.perez@example.com', '3203334455');
+('Andrés', 'Pérez', 'Rodríguez', '902345678', 'andres.perez@example.com', '3203334455');</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/insert-cliente.png" alt="Resultado de la inserción en la tabla Cliente." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>insert-cliente.png</strong>)</p>
+                </div>
+              </div>
 
--- =========================================
--- INSERTS PARA TABLA EMPLEADO
--- =========================================
-INSERT INTO Empleado (Nombres, PrimerApellido, SegundoApellido, RolEmpleado, idTienda) VALUES
+              <!-- Slide 3: Empleado -->
+              <div class="insert-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Inserts: Empleado</h4>
+                <pre><code class="language-sql">INSERT INTO Empleado (Nombres, PrimerApellido, SegundoApellido, RolEmpleado, idTienda) VALUES
 ('Laura', 'Ramírez', 'Suárez', 'Cajera', 1),
 ('Jorge', 'Mendoza', 'Castro', 'Vendedor', 1),
 ('Paola', 'Díaz', 'Jiménez', 'Administrador', 2),
-('Luis', 'Ortiz', 'García', 'Vendedor', 3);
+('Luis', 'Ortiz', 'García', 'Vendedor', 3);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/insert-empleado.png" alt="Resultado de la inserción en la tabla Empleado." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>insert-empleado.png</strong>)</p>
+                </div>
+              </div>
 
--- =========================================
--- INSERTS PARA TABLA PROVEEDOR
--- =========================================
-INSERT INTO Proveedor (Nombres, PrimerApellido, SegundoApellido, NIT, Telefono, Correo) VALUES
+              <!-- Slide 4: Proveedor -->
+              <div class="insert-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Inserts: Proveedor</h4>
+                <pre><code class="language-sql">INSERT INTO Proveedor (Nombres, PrimerApellido, SegundoApellido, NIT, Telefono, Correo) VALUES
 ('Pedro', 'Sánchez', 'Morales', '800123456', '3015556677', 'pedro.sanchez@proveedor.com'),
-('Ana', 'Torres', 'Castillo', '801234567', '3026667788', 'ana.torres@proveedor.com');
+('Ana', 'Torres', 'Castillo', '801234567', '3026667788', 'ana.torres@proveedor.com');</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/insert-proveedor.png" alt="Resultado de la inserción en la tabla Proveedor." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>insert-proveedor.png</strong>)</p>
+                </div>
+              </div>
 
--- =========================================
--- INSERTS PARA TABLA PRODUCTO
--- =========================================
-INSERT INTO Producto (NombreProducto, Descripcion, Categoria, Marca, Talla, Color, SKU, Precio, Estado) VALUES
+              <!-- Slide 5: Producto -->
+              <div class="insert-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Inserts: Producto</h4>
+                <pre><code class="language-sql">INSERT INTO Producto (NombreProducto, Descripcion, Categoria, Marca, Talla, Color, SKU, Precio, Estado) VALUES
 ('Zapatilla Running', 'Calzado deportivo para correr', 'Deportivo', 'Nike', '42', 'Negro', 'SKU001', 250000, 'Activo'),
 ('Zapato Formal Hombre', 'Zapato de cuero elegante', 'Formal', 'Clarks', '40', 'Café', 'SKU002', 320000, 'Activo'),
 ('Sandalia Mujer', 'Sandalia casual para dama', 'Casual', 'Adidas', '37', 'Beige', 'SKU003', 150000, 'Activo'),
-('Botas Hombre', 'Bota de cuero resistente', 'Casual', 'Timberland', '43', 'Marrón', 'SKU004', 450000, 'Activo');
+('Botas Hombre', 'Bota de cuero resistente', 'Casual', 'Timberland', '43', 'Marrón', 'SKU004', 450000, 'Activo');</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/insert-producto.png" alt="Resultado de la inserción en la tabla Producto." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>insert-producto.png</strong>)</p>
+                </div>
+              </div>
 
--- =========================================
--- INSERTS PARA TABLA INVENTARIO
--- =========================================
-INSERT INTO Inventario (idTienda, idProducto, CantidadDisponible) VALUES
+              <!-- Slide 6: Inventario -->
+              <div class="insert-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Inserts: Inventario</h4>
+                <pre><code class="language-sql">INSERT INTO Inventario (idTienda, idProducto, CantidadDisponible) VALUES
 (1, 1, 15),
 (1, 2, 10),
 (2, 3, 20),
-(3, 4, 8);
+(3, 4, 8);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/insert-inventario.png" alt="Resultado de la inserción en la tabla Inventario." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>insert-inventario.png</strong>)</p>
+                </div>
+              </div>
 
--- =========================================
--- INSERTS PARA TABLA COMPRA PRODUCTO
--- =========================================
-INSERT INTO CompraProducto (FechaCompra, SubTotal, ValorImpuestos, TotalCompra, idTienda, idProveedor) VALUES
+              <!-- Slide 7: CompraProducto -->
+              <div class="insert-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Inserts: CompraProducto</h4>
+                <pre><code class="language-sql">INSERT INTO CompraProducto (FechaCompra, SubTotal, ValorImpuestos, TotalCompra, idTienda, idProveedor) VALUES
 ('2025-08-01', 600000, 114000, 714000, 1, 1),
-('2025-08-05', 450000, 85500, 535500, 2, 2);
+('2025-08-05', 450000, 85500, 535500, 2, 2);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/insert-compra.png" alt="Resultado de la inserción en la tabla CompraProducto." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>insert-compra.png</strong>)</p>
+                </div>
+              </div>
 
--- =========================================
--- INSERTS PARA TABLA DETALLE COMPRA PRODUCTOS
--- =========================================
-INSERT INTO DetalleCompraProductos (idCompraProducto, idProducto, Cantidad, PrecioUnidad) VALUES
+              <!-- Slide 8: DetalleCompraProductos -->
+              <div class="insert-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Inserts: Detalle de Compra</h4>
+                <pre><code class="language-sql">INSERT INTO DetalleCompraProductos (idCompraProducto, idProducto, Cantidad, PrecioUnidad) VALUES
 (1, 1, 10, 240000),
 (1, 2, 5, 300000),
 (2, 3, 15, 140000),
-(2, 4, 5, 430000);
+(2, 4, 5, 430000);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/insert-detallecompra.png" alt="Resultado de la inserción en DetalleCompraProductos." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>insert-detallecompra.png</strong>)</p>
+                </div>
+              </div>
 
--- =========================================
--- INSERTS PARA TABLA FACTURA
--- =========================================
-INSERT INTO Factura (FechaHora, SubTotal, Descuento, Total, FacturaVencida, idEmpleado, idCliente, idTienda) VALUES
+              <!-- Slide 9: Factura -->
+              <div class="insert-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Inserts: Factura</h4>
+                <pre><code class="language-sql">INSERT INTO Factura (FechaHora, SubTotal, Descuento, Total, FacturaVencida, idEmpleado, idCliente, idTienda) VALUES
 ('2025-08-20 14:30:00', 500000, 20000, 480000, 'NO', 1, 1, 1),
 ('2025-08-21 16:00:00', 320000, 0, 320000, 'NO', 2, 2, 1),
-('2025-08-22 11:15:00', 600000, 30000, 570000, 'NO', 3, 3, 2);
-
--- =========================================
--- INSERTS PARA TABLA DETALLE FACTURA
--- =========================================
-INSERT INTO DetalleFactura (idFactura, idProducto, Cantidad, ValorUnitario, Descuento, IVA) VALUES
+('2025-08-22 11:15:00', 600000, 30000, 570000, 'NO', 3, 3, 2);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/insert-factura.png" alt="Resultado de la inserción en la tabla Factura." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>insert-factura.png</strong>)</p>
+                </div>
+              </div>
+              
+              <!-- Slide 10: DetalleFactura -->
+              <div class="insert-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Inserts: Detalle de Factura</h4>
+                <pre><code class="language-sql">INSERT INTO DetalleFactura (idFactura, idProducto, Cantidad, ValorUnitario, Descuento, IVA) VALUES
 (1, 1, 2, 250000, 20000, 47500),
 (2, 2, 1, 320000, 0, 60800),
-(3, 3, 3, 150000, 30000, 85500);
-
--- =========================================
--- INSERTS PARA TABLA PAGO
--- =========================================
-INSERT INTO Pago (Monto, TipoPago, idFactura) VALUES
+(3, 3, 3, 150000, 30000, 85500);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/insert-detallefactura.png" alt="Resultado de la inserción en la tabla DetalleFactura." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>insert-detallefactura.png</strong>)</p>
+                </div>
+              </div>
+              
+              <!-- Slide 11: Pago -->
+              <div class="insert-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+                <h4 class="font-bold text-brand-700 mb-2 text-center">Inserts: Pago</h4>
+                <pre><code class="language-sql">INSERT INTO Pago (Monto, TipoPago, idFactura) VALUES
 (480000, 'Tarjeta Crédito', 1),
 (320000, 'Efectivo', 2),
-(570000, 'Transferencia', 3);
-</code></pre>
-          <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-6">
-            <img src="insercion-datos.png" alt="Captura de la ejecución de los inserts." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
-            <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre de archivo: <strong>insercion-datos.png</strong>)</p>
-            <p class="text-xs text-slate-500 mt-1">Fecha y hora de ejecución: <span class="font-mono">2025-08-27 10:48:30</span> (actualizar)</p>
+(570000, 'Transferencia', 3);</code></pre>
+                <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                  <img src="img/insert-pago.png" alt="Resultado de la inserción en la tabla Pago." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                  <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>insert-pago.png</strong>)</p>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
       </div>
@@ -901,54 +1035,58 @@ INSERT INTO Pago (Monto, TipoPago, idFactura) VALUES
     <section id="panel-consultas" class="panel hidden">
        <div class="card-fun p-4 sm:p-6">
         <h2 class="text-2xl font-black mb-4">🔍 Consultas SQL Adaptadas</h2>
+        <p class="text-slate-700">Explora las diferentes consultas SQL para interactuar con la base de datos. Utiliza los botones para navegar a través de los ejemplos, desde los más simples hasta los más complejos.</p>
 
-        <div class="flex flex-wrap gap-2 sm:gap-3 mb-6 border-b-2 border-black pb-4">
-          <button data-sub-tab="cq-simples" class="sub-tab-btn tab-btn tab-active rounded-xl px-4 py-2 text-sm">Simples</button>
-          <button data-sub-tab="cq-intermedias" class="sub-tab-btn tab-btn rounded-xl px-4 py-2 text-sm">Intermedias</button>
-          <button data-sub-tab="cq-avanzadas" class="sub-tab-btn tab-btn rounded-xl px-4 py-2 text-sm">Avanzadas y Actualización</button>
-        </div>
-
-        <!-- Sub-panel Consultas Simples -->
-        <div id="sub-panel-cq-simples" class="sub-panel space-y-6">
-          <h3 class="font-bold text-lg">1. Consultas Simples</h3>
-          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
-            <p class="text-slate-700 mb-2 font-semibold">1.1. Ver todos los clientes:</p>
-            <pre><code class="language-sql">SELECT * FROM Cliente;</code></pre>
-             <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
-               <img src="consulta-simple-1.png" alt="Resultado de ver todos los clientes." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
-               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-simple-1.png</strong>)</p>
-             </div>
+        <div id="query-slideshow-container" class="relative mt-6">
+          <!-- Controles de Navegación -->
+          <div class="flex items-center justify-center gap-4 mb-4">
+            <button id="prev-query-btn" class="size-10 bg-white rounded-full grid place-content-center font-bold text-lg shadow-pop border-2 border-black">&lt;</button>
+            <span id="query-slide-counter" class="font-bold text-brand-700 text-lg px-4 py-2 bg-white rounded-xl border-2 border-black"></span>
+            <button id="next-query-btn" class="size-10 bg-white rounded-full grid place-content-center font-bold text-lg shadow-pop border-2 border-black">&gt;</button>
           </div>
-          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
-            <p class="text-slate-700 mb-2 font-semibold">1.2. Buscar un cliente por nombre:</p>
-            <pre><code class="language-sql">SELECT * FROM Cliente WHERE Nombres LIKE '%Carlos%';</code></pre>
-            <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
-               <img src="consulta-simple-2.png" alt="Resultado de buscar un cliente." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
-               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-simple-2.png</strong>)</p>
-             </div>
-          </div>
-        </div>
 
-        <!-- Sub-panel Consultas Intermedias -->
-        <div id="sub-panel-cq-intermedias" class="sub-panel hidden space-y-6">
-          <h3 class="font-bold text-lg">2. Consultas Intermedias</h3>
-          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
-            <p class="text-slate-700 mb-2 font-semibold">2.1. Mostrar todas las facturas con su cliente:</p>
-            <pre><code class="language-sql">SELECT 
+          <!-- Contenedor de las "Diapositivas" de Consultas -->
+          <div id="query-slides-wrapper">
+            <!-- Slide 1: Ver todos los clientes -->
+            <div class="query-slide bg-white/50 p-4 rounded-xl border-2 border-black/50">
+              <h4 class="font-bold text-brand-700 mb-2 text-center">1. Ver todos los clientes</h4>
+              <pre><code class="language-sql">SELECT * FROM Cliente;</code></pre>
+              <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                <img src="img/consulta-simple-1.png" alt="Resultado de ver todos los clientes." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-simple-1.png</strong>)</p>
+              </div>
+            </div>
+
+            <!-- Slide 2: Buscar un cliente -->
+            <div class="query-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+              <h4 class="font-bold text-brand-700 mb-2 text-center">2. Buscar un cliente por nombre</h4>
+              <pre><code class="language-sql">SELECT * FROM Cliente WHERE Nombres LIKE '%Carlos%';</code></pre>
+              <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                <img src="img/consulta-simple-2.png" alt="Resultado de buscar un cliente." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-simple-2.png</strong>)</p>
+              </div>
+            </div>
+
+            <!-- Slide 3: Facturas con cliente -->
+            <div class="query-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+              <h4 class="font-bold text-brand-700 mb-2 text-center">3. Mostrar facturas con su cliente (JOIN)</h4>
+              <pre><code class="language-sql">SELECT 
     f.idFactura, 
     CONCAT(c.Nombres, ' ', c.PrimerApellido) AS Cliente, 
     f.FechaHora, 
     f.Total
 FROM Factura f
 JOIN Cliente c ON f.idCliente = c.idCliente;</code></pre>
-            <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
-               <img src="consulta-intermedia-1.png" alt="Resultado de facturas con clientes." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
-               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-intermedia-1.png</strong>)</p>
-             </div>
-          </div>
-          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
-            <p class="text-slate-700 mb-2 font-semibold">2.2. Mostrar el detalle de una factura específica:</p>
-            <pre><code class="language-sql">SELECT 
+              <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                <img src="img/consulta-intermedia-1.png" alt="Resultado de facturas con clientes." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-intermedia-1.png</strong>)</p>
+              </div>
+            </div>
+
+            <!-- Slide 4: Detalle de factura -->
+            <div class="query-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+              <h4 class="font-bold text-brand-700 mb-2 text-center">4. Detalle de una factura específica (multi-JOIN)</h4>
+              <pre><code class="language-sql">SELECT 
     f.idFactura,
     CONCAT(c.Nombres, ' ', c.PrimerApellido) AS Cliente,
     p.NombreProducto AS Producto,
@@ -959,33 +1097,32 @@ JOIN Cliente c ON f.idCliente = c.idCliente
 JOIN DetalleFactura df ON f.idFactura = df.idFactura
 JOIN Producto p ON df.idProducto = p.idProducto
 WHERE f.idFactura = 1;</code></pre>
-            <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
-               <img src="consulta-intermedia-2.png" alt="Resultado del detalle de una factura." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
-               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-intermedia-2.png</strong>)</p>
-             </div>
-          </div>
-        </div>
-        
-        <!-- Sub-panel Consultas Avanzadas -->
-        <div id="sub-panel-cq-avanzadas" class="sub-panel hidden space-y-6">
-          <h3 class="font-bold text-lg">3. Consultas Avanzadas y de Actualización</h3>
-          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
-            <p class="text-slate-700 mb-2 font-semibold">3.1. Clientes con mayor gasto:</p>
-            <pre><code class="language-sql">SELECT 
+              <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                <img src="img/consulta-intermedia-2.png" alt="Resultado del detalle de una factura." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-intermedia-2.png</strong>)</p>
+              </div>
+            </div>
+            
+            <!-- Slide 5: Clientes con mayor gasto -->
+            <div class="query-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+              <h4 class="font-bold text-brand-700 mb-2 text-center">5. Clientes con mayor gasto (GROUP BY, SUM)</h4>
+              <pre><code class="language-sql">SELECT 
     CONCAT(c.Nombres, ' ', c.PrimerApellido) AS Cliente, 
     SUM(f.Total) AS GastoTotal
 FROM Cliente c
 JOIN Factura f ON c.idCliente = f.idCliente
 GROUP BY Cliente
 ORDER BY GastoTotal DESC;</code></pre>
-            <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
-               <img src="consulta-avanzada-1.png" alt="Resultado de clientes con mayor gasto." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
-               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-avanzada-1.png</strong>)</p>
-             </div>
-          </div>
-          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
-            <p class="text-slate-700 mb-2 font-semibold">3.2. Producto más vendido:</p>
-            <pre><code class="language-sql">SELECT 
+              <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                <img src="img/consulta-avanzada-1.png" alt="Resultado de clientes con mayor gasto." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-avanzada-1.png</strong>)</p>
+              </div>
+            </div>
+            
+            <!-- Slide 6: Producto más vendido -->
+            <div class="query-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+              <h4 class="font-bold text-brand-700 mb-2 text-center">6. Producto más vendido (GROUP BY, LIMIT)</h4>
+              <pre><code class="language-sql">SELECT 
     p.NombreProducto, 
     SUM(df.Cantidad) AS CantidadVendida
 FROM DetalleFactura df
@@ -993,27 +1130,30 @@ JOIN Producto p ON df.idProducto = p.idProducto
 GROUP BY p.NombreProducto
 ORDER BY CantidadVendida DESC
 LIMIT 1;</code></pre>
-            <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
-               <img src="consulta-avanzada-2.png" alt="Resultado del producto más vendido." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
-               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-avanzada-2.png</strong>)</p>
-             </div>
-          </div>
-          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
-            <p class="text-slate-700 mb-2 font-semibold">3.3. Actualizar inventario después de una venta:</p>
-            <pre><code class="language-sql">-- Primero, consultamos el stock actual para ver el cambio
+              <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                <img src="img/consulta-avanzada-2.png" alt="Resultado del producto más vendido." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-avanzada-2.png</strong>)</p>
+              </div>
+            </div>
+            
+            <!-- Slide 7: Actualizar inventario -->
+            <div class="query-slide hidden bg-white/50 p-4 rounded-xl border-2 border-black/50">
+              <h4 class="font-bold text-brand-700 mb-2 text-center">7. Actualizar inventario (UPDATE)</h4>
+              <pre><code class="language-sql">-- 1. Consultamos el stock actual para ver el cambio
 SELECT CantidadDisponible FROM Inventario WHERE idProducto = 1 AND idTienda = 1;
 
--- Ejecutamos la actualización (simulando que se vendieron 2 unidades)
+-- 2. Ejecutamos la actualización (simulando que se vendieron 2 unidades)
 UPDATE Inventario 
 SET CantidadDisponible = CantidadDisponible - 2 
 WHERE idProducto = 1 AND idTienda = 1;
 
--- Volvemos a consultar para verificar el nuevo stock
+-- 3. Verificamos el nuevo stock
 SELECT CantidadDisponible FROM Inventario WHERE idProducto = 1 AND idTienda = 1;</code></pre>
-            <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
-               <img src="consulta-update.png" alt="Resultado de la actualización de inventario." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
-               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-update.png</strong>)</p>
-             </div>
+              <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+                <img src="img/consulta-update.png" alt="Resultado de la actualización de inventario." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+                <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-update.png</strong>)</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1241,13 +1381,6 @@ VALUES (550000, 'Efectivo', 4);</code></pre>
     let voiceEnabled = false;
     let selectedVoice = null;
     
-    // Objeto para manejar el estado del visor ERD
-    const erdState = {
-      scale: 1, panX: 0, panY: 0,
-      isPanning: false, startX: 0, startY: 0,
-      viewport: null, image: null
-    };
-
     function switchTo(tab){
       $$('.tab-btn:not(.sub-tab-btn)').forEach(b=> b.classList.toggle('tab-active', b.dataset.tab===tab));
       $$('.panel').forEach(p=>{ 
@@ -1261,7 +1394,7 @@ VALUES (550000, 'Efectivo', 4);</code></pre>
         } 
       });
       
-      if (tab === 'erd') resetERDView();
+      if (tab === 'erd') setupInteractiveERD();
       if(voiceEnabled) speakCurrentSummary();
     }
 
@@ -1331,57 +1464,138 @@ VALUES (550000, 'Efectivo', 4);</code></pre>
     });
     
     // === Lógica del visor interactivo del ERD ===
-    const updateERDTransform = () => {
-      if (erdState.image) erdState.image.style.transform = `translate(${erdState.panX}px, ${erdState.panY}px) scale(${erdState.scale})`;
-    };
-    
-    const resetERDView = () => {
-      const { image, viewport } = erdState;
-      if (!image || !viewport || image.naturalWidth === 0 || viewport.clientWidth === 0) return;
-      
-      erdState.scale = Math.min(1, viewport.clientWidth / image.naturalWidth);
-      const scaledHeight = image.naturalHeight * erdState.scale;
-      erdState.panX = 0;
-      erdState.panY = (viewport.clientHeight - scaledHeight) / 2;
-      updateERDTransform();
+    const erdState = {
+      isInitialized: false, scale: 1, panX: 0, panY: 0,
+      isPanning: false, startX: 0, startY: 0,
+      viewport: null, image: null
     };
 
     function setupInteractiveERD() {
-      erdState.viewport = $('#erd-viewport');
-      erdState.image = $('#erd-interactive-img');
-      const { viewport, image } = erdState;
-      if (!viewport || !image) return;
+        if (erdState.isInitialized) return;
+        erdState.viewport = $('#erd-viewport');
+        erdState.image = $('#erd-interactive-img');
+        if (!erdState.viewport || !erdState.image) return;
 
-      image.onload = resetERDView;
-      if (image.complete) resetERDView();
-      
-      $('#erd-zoom-in')?.addEventListener('click', () => { erdState.scale = Math.min(4, erdState.scale * 1.25); updateERDTransform(); });
-      $('#erd-zoom-out')?.addEventListener('click', () => { erdState.scale = Math.max(0.2, erdState.scale / 1.25); updateERDTransform(); });
-      $('#erd-zoom-fit')?.addEventListener('click', resetERDView);
-      
-      viewport.addEventListener('mousedown', (e) => {
-        e.preventDefault(); erdState.isPanning = true;
-        erdState.startX = e.clientX - erdState.panX; erdState.startY = e.clientY - erdState.panY;
+        const updateERDTransform = () => erdState.image.style.transform = `translate(${erdState.panX}px, ${erdState.panY}px) scale(${erdState.scale})`;
+        
+        const resetERDView = () => {
+            if (!erdState.image.complete || erdState.image.naturalWidth === 0 || erdState.viewport.clientWidth === 0) return;
+            erdState.scale = Math.min(1, erdState.viewport.clientWidth / erdState.image.naturalWidth);
+            const scaledHeight = erdState.image.naturalHeight * erdState.scale;
+            erdState.panX = 0;
+            erdState.panY = Math.max(0, (erdState.viewport.clientHeight - scaledHeight) / 2);
+            updateERDTransform();
+        };
+        
+        erdState.image.onload = resetERDView;
+        if (erdState.image.complete) resetERDView();
+        
+        $('#erd-zoom-in')?.addEventListener('click', () => { erdState.scale = Math.min(4, erdState.scale * 1.25); updateERDTransform(); });
+        $('#erd-zoom-out')?.addEventListener('click', () => { erdState.scale = Math.max(0.2, erdState.scale / 1.25); updateERDTransform(); });
+        $('#erd-zoom-fit')?.addEventListener('click', resetERDView);
+        
+        erdState.viewport.addEventListener('mousedown', (e) => { e.preventDefault(); erdState.isPanning = true; erdState.startX = e.clientX - erdState.panX; erdState.startY = e.clientY - erdState.panY; });
+        document.addEventListener('mousemove', (e) => { if (erdState.isPanning) { erdState.panX = e.clientX - erdState.startX; erdState.panY = e.clientY - erdState.startY; updateERDTransform(); } });
+        document.addEventListener('mouseup', () => { erdState.isPanning = false; });
+        erdState.viewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const rect = erdState.viewport.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
+            const scaleAmount = 1 - e.deltaY * 0.001;
+            const newScale = Math.max(0.2, Math.min(4, erdState.scale * scaleAmount));
+            erdState.panX = mouseX - (mouseX - erdState.panX) * (newScale / erdState.scale);
+            erdState.panY = mouseY - (mouseY - erdState.panY) * (newScale / erdState.scale);
+            erdState.scale = newScale;
+            updateERDTransform();
+        });
+        
+        new ResizeObserver(resetERDView).observe(erdState.viewport);
+        erdState.isInitialized = true;
+    }
+    
+    // === Lógica para los SLIDESHOWS (reutilizable) ===
+    const slideshows = {};
+
+    function setupSlideshow(containerId, slideClass, counterPrefix) {
+      const container = $(`#${containerId}`);
+      if (!container) return;
+
+      const slides = $$(`.${slideClass}`, container);
+      const totalSlides = slides.length;
+      if (totalSlides === 0) return;
+
+      slideshows[containerId] = {
+        currentIndex: 0,
+        slides: slides,
+        totalSlides: totalSlides,
+        prevBtn: $(`[id^="prev-"]`, container),
+        nextBtn: $(`[id^="next-"]`, container),
+        counter: $(`[id$="-counter"]`, container),
+        counterPrefix: counterPrefix
+      };
+
+      const updateView = () => {
+        const state = slideshows[containerId];
+        state.slides.forEach((slide, index) => {
+          slide.classList.toggle('hidden', index !== state.currentIndex);
+          if (index === state.currentIndex) {
+            slide.style.animation = 'none';
+            slide.offsetHeight; // Trigger reflow
+            slide.style.animation = 'fade-up .45s';
+          }
+        });
+        state.counter.textContent = `${state.counterPrefix} ${state.currentIndex + 1} de ${state.totalSlides}`;
+        state.prevBtn.disabled = state.currentIndex === 0;
+        state.nextBtn.disabled = state.currentIndex === totalSlides - 1;
+      };
+
+      slideshows[containerId].prevBtn.addEventListener('click', () => {
+        if (slideshows[containerId].currentIndex > 0) {
+          slideshows[containerId].currentIndex--;
+          updateView();
+        }
       });
-      document.addEventListener('mousemove', (e) => {
-        if (!erdState.isPanning) return;
-        erdState.panX = e.clientX - erdState.startX; erdState.panY = e.clientY - erdState.startY;
-        updateERDTransform();
-      });
-      document.addEventListener('mouseup', () => { erdState.isPanning = false; });
-      viewport.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        const rect = viewport.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
-        const scaleAmount = 1 - e.deltaY * 0.001;
-        const newScale = Math.max(0.2, Math.min(4, erdState.scale * scaleAmount));
-        erdState.panX = mouseX - (mouseX - erdState.panX) * (newScale / erdState.scale);
-        erdState.panY = mouseY - (mouseY - erdState.panY) * (newScale / erdState.scale);
-        erdState.scale = newScale;
-        updateERDTransform();
+
+      slideshows[containerId].nextBtn.addEventListener('click', () => {
+        if (slideshows[containerId].currentIndex < totalSlides - 1) {
+          slideshows[containerId].currentIndex++;
+          updateView();
+        }
       });
       
-      if(erdState.viewport) new ResizeObserver(resetERDView).observe(erdState.viewport);
+      updateView(); // Initial view setup
+    }
+
+    // === Lógica para los botones de Copiar Código ===
+    function setupCopyButtons() {
+      $$('pre').forEach(preElement => {
+        // Evitar añadir un botón si ya existe
+        if (preElement.parentNode.classList.contains('group')) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relative group';
+
+        const copyButton = document.createElement('button');
+        copyButton.innerHTML = 'Copiar';
+        copyButton.className = 'absolute top-3 right-3 bg-slate-800/50 backdrop-blur text-white text-xs font-semibold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-slate-700/70 border-0';
+        copyButton.style.boxShadow = 'none';
+        
+        preElement.parentNode.insertBefore(wrapper, preElement);
+        wrapper.appendChild(preElement);
+        wrapper.appendChild(copyButton);
+
+        copyButton.addEventListener('click', () => {
+          const codeToCopy = preElement.querySelector('code')?.innerText || '';
+          navigator.clipboard.writeText(codeToCopy).then(() => {
+            copyButton.textContent = '¡Copiado!';
+            setTimeout(() => { copyButton.textContent = 'Copiar'; }, 2000);
+          }).catch(err => {
+            console.error('Error al copiar el código: ', err);
+            copyButton.textContent = 'Error';
+             setTimeout(() => { copyButton.textContent = 'Copiar'; }, 2000);
+          });
+        });
+      });
     }
 
     function init(){
@@ -1389,7 +1603,6 @@ VALUES (550000, 'Efectivo', 4);</code></pre>
       renderOriginal(); render1FN(); render2FN(); render3FN();
       
       $$('.tab-btn:not(.sub-tab-btn)').forEach(b=> b.addEventListener('click', ()=> switchTo(b.dataset.tab)));
-      
       $$('.sub-tab-btn').forEach(b => {
         b.addEventListener('click', () => {
           const subTabId = b.dataset.subTab;
@@ -1423,6 +1636,11 @@ VALUES (550000, 'Efectivo', 4);</code></pre>
       };
       init();
       setupInteractiveERD();
+      // Inicializar todos los slideshows
+      setupSlideshow('table-slideshow-container', 'table-slide', 'Tabla');
+      setupSlideshow('insert-slideshow-container', 'insert-slide', 'Paso');
+      setupSlideshow('query-slideshow-container', 'query-slide', 'Consulta');
+      setupCopyButtons();
     });
   </script>
 </body>
