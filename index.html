@@ -174,7 +174,18 @@
     }
     
     /* Código más divertido */
-    code {
+    pre code {
+      background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+      padding: 1rem;
+      border-radius: 0.75rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      border: 1px solid #4a5568;
+      display: block;
+      white-space: pre-wrap;
+      font-family: 'Courier New', Courier, monospace;
+    }
+    code:not(pre *) {
       background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
       padding: 2px 8px;
       border-radius: 6px;
@@ -261,10 +272,13 @@
       }
     }
     
-    .panel {
-      animation: slideIn 0.5s ease-out;
+    .panel, .sub-panel {
+      animation: slideIn 0.5s ease-out forwards;
     }
-    
+    .sub-panel {
+      animation-name: fade-up;
+    }
+
     /* Elementos decorativos */
     .decoration-dot {
       position: absolute;
@@ -313,12 +327,15 @@
       </div>
     </div>
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 pb-4">
-      <div class="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+      <div class="flex flex-wrap gap-2 sm:gap-3">
         <button data-tab="original" class="tab-btn tab-active rounded-xl px-4 py-2 text-sm">📋 Tabla Original</button>
         <button data-tab="1fn" class="tab-btn rounded-xl px-4 py-2 text-sm">1️⃣ Primera Forma Normal</button>
         <button data-tab="2fn" class="tab-btn rounded-xl px-4 py-2 text-sm">2️⃣ Segunda Forma Normal</button>
         <button data-tab="3fn" class="tab-btn rounded-xl px-4 py-2 text-sm">3️⃣ Tercera Forma Normal</button>
         <button data-tab="erd" class="tab-btn rounded-xl px-4 py-2 text-sm">🎨 Diagrama Final</button>
+        <button data-tab="implementacion" class="tab-btn rounded-xl px-4 py-2 text-sm">🚀 Implementación</button>
+        <button data-tab="consultas" class="tab-btn rounded-xl px-4 py-2 text-sm">🔍 Consultas</button>
+        <button data-tab="extras" class="tab-btn rounded-xl px-4 py-2 text-sm">💡 Extras</button>
       </div>
     </nav>
   </header>
@@ -329,7 +346,7 @@
       <div class="grid md:grid-cols-3 gap-6">
         <div class="md:col-span-2 card-fun p-4 sm:p-6">
           <h2 class="text-2xl font-black mb-3">📊 Tabla Original (ventas consolidadas)</h2>
-          <p class="text-slate-700 mb-4">Hoja de ventas con <span class="font-bold text-brand-600">productos listados en una sola celda</span> por factura (viola           1FN). Las columnas repiten datos de cliente, empleado y sucursal en cada fila.</p>
+          <p class="text-slate-700 mb-4">Hoja de ventas con <span class="font-bold text-brand-600">productos listados en una sola celda</span> por factura (viola 1FN). Las columnas repiten datos de cliente, empleado y sucursal en cada fila.</p>
           <div class="overflow-auto rounded-xl border-3 border-black shadow-pop">
             <table class="min-w-full text-sm">
               <thead class="text-white">
@@ -594,6 +611,509 @@
         </div>
       </aside>
     </section>
+
+    <!-- IMPLEMENTACION -->
+    <section id="panel-implementacion" class="panel hidden">
+      <div class="card-fun p-4 sm:p-6">
+        <h2 class="text-2xl font-black mb-4">🚀 Implementación en SQL</h2>
+        
+        <div class="flex flex-wrap gap-2 sm:gap-3 mb-6 border-b-2 border-black pb-4">
+          <button data-sub-tab="impl-db" class="sub-tab-btn tab-btn tab-active rounded-xl px-4 py-2 text-sm">1. Crear BD</button>
+          <button data-sub-tab="impl-tables" class="sub-tab-btn tab-btn rounded-xl px-4 py-2 text-sm">2. Crear Tablas</button>
+          <button data-sub-tab="impl-inserts" class="sub-tab-btn tab-btn rounded-xl px-4 py-2 text-sm">3. Insertar Datos</button>
+        </div>
+
+        <div id="sub-panel-impl-db" class="sub-panel space-y-6">
+          <h3 class="font-bold text-lg">Paso 1: Crear la Base de Datos</h3>
+          <p class="text-slate-700">El comando inicial se asegura de empezar desde cero, eliminando cualquier versión anterior de la base de datos antes de crearla y seleccionarla para su uso.</p>
+          <pre><code class="language-sql">DROP DATABASE IF EXISTS TiendaZapatos;
+CREATE DATABASE TiendaZapatos;
+USE TiendaZapatos;</code></pre>
+          <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-6">
+            <img src="creacion-bd.png" alt="Captura de la creación de la base de datos." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+            <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre de archivo: <strong>creacion-bd.png</strong>)</p>
+            <p class="text-xs text-slate-500 mt-1">Fecha y hora de ejecución: <span class="font-mono">2025-08-27 10:45:15</span> (actualizar)</p>
+          </div>
+        </div>
+
+        <div id="sub-panel-impl-tables" class="sub-panel hidden space-y-6">
+          <h3 class="font-bold text-lg">Paso 2: Crear la Estructura de Tablas</h3>
+          <p class="text-slate-700">A continuación, se ejecuta el script con todas las sentencias <code>CREATE TABLE</code>. Es importante definir correctamente las claves primarias (PK) y foráneas (FK), y respetar el orden de creación para que las dependencias se cumplan.</p>
+          <pre><code class="language-sql">-- ==========================
+-- TABLA TIENDA
+-- ==========================
+CREATE TABLE Tienda (
+    idTienda INT AUTO_INCREMENT PRIMARY KEY,
+    NombreTienda VARCHAR(45) NOT NULL,
+    Direccion VARCHAR(100),
+    Descripcion VARCHAR(100)
+);
+
+-- ==========================
+-- TABLA CLIENTE
+-- ==========================
+CREATE TABLE Cliente (
+    idCliente INT AUTO_INCREMENT PRIMARY KEY,
+    Nombres VARCHAR(45) NOT NULL,
+    PrimerApellido VARCHAR(45) NOT NULL,
+    SegundoApellido VARCHAR(45),
+    NIT VARCHAR(15) UNIQUE,
+    Correo VARCHAR(45),
+    Telefono VARCHAR(15)
+);
+
+-- ==========================
+-- TABLA EMPLEADO
+-- ==========================
+CREATE TABLE Empleado (
+    idEmpleado INT AUTO_INCREMENT PRIMARY KEY,
+    Nombres VARCHAR(45) NOT NULL,
+    PrimerApellido VARCHAR(45) NOT NULL,
+    SegundoApellido VARCHAR(45),
+    RolEmpleado VARCHAR(45) NOT NULL,
+    idTienda INT,
+    FOREIGN KEY (idTienda) REFERENCES Tienda(idTienda)
+);
+
+-- ==========================
+-- TABLA PRODUCTO
+-- ==========================
+CREATE TABLE Producto (
+    idProducto INT AUTO_INCREMENT PRIMARY KEY,
+    NombreProducto VARCHAR(45) NOT NULL,
+    Descripcion VARCHAR(100),
+    Categoria VARCHAR(45),
+    Marca VARCHAR(45),
+    Talla VARCHAR(10),
+    Color VARCHAR(45),
+    SKU VARCHAR(45) UNIQUE,
+    Precio DECIMAL(10,2) NOT NULL,
+    Estado VARCHAR(45) DEFAULT 'Activo'
+);
+
+-- ==========================
+-- TABLA INVENTARIO
+-- ==========================
+CREATE TABLE Inventario (
+    idInventario INT AUTO_INCREMENT PRIMARY KEY,
+    idTienda INT,
+    idProducto INT,
+    CantidadDisponible INT NOT NULL,
+    FOREIGN KEY (idTienda) REFERENCES Tienda(idTienda),
+    FOREIGN KEY (idProducto) REFERENCES Producto(idProducto)
+);
+
+-- ==========================
+-- TABLA PROVEEDOR
+-- ==========================
+CREATE TABLE Proveedor (
+    idProveedor INT AUTO_INCREMENT PRIMARY KEY,
+    Nombres VARCHAR(45) NOT NULL,
+    PrimerApellido VARCHAR(45),
+    SegundoApellido VARCHAR(45),
+    NIT VARCHAR(15) UNIQUE,
+    Telefono VARCHAR(15),
+    Correo VARCHAR(45)
+);
+
+-- ==========================
+-- TABLA COMPRA PRODUCTO
+-- ==========================
+CREATE TABLE CompraProducto (
+    idCompraProducto INT AUTO_INCREMENT PRIMARY KEY,
+    FechaCompra DATE NOT NULL,
+    SubTotal DECIMAL(10,2),
+    ValorImpuestos DECIMAL(10,2),
+    TotalCompra DECIMAL(10,2),
+    idTienda INT,
+    idProveedor INT,
+    FOREIGN KEY (idTienda) REFERENCES Tienda(idTienda),
+    FOREIGN KEY (idProveedor) REFERENCES Proveedor(idProveedor)
+);
+
+-- ==========================
+-- TABLA DETALLE COMPRA PRODUCTOS
+-- ==========================
+CREATE TABLE DetalleCompraProductos (
+    idDetalleCompraProductos INT AUTO_INCREMENT PRIMARY KEY,
+    idCompraProducto INT,
+    idProducto INT,
+    Cantidad INT NOT NULL,
+    PrecioUnidad DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (idCompraProducto) REFERENCES CompraProducto(idCompraProducto),
+    FOREIGN KEY (idProducto) REFERENCES Producto(idProducto)
+);
+
+-- ==========================
+-- TABLA FACTURA
+-- ==========================
+CREATE TABLE Factura (
+    idFactura INT AUTO_INCREMENT PRIMARY KEY,
+    FechaHora DATETIME NOT NULL,
+    SubTotal DECIMAL(10,2) NOT NULL,
+    Descuento DECIMAL(10,2) DEFAULT 0,
+    Total DECIMAL(10,2) NOT NULL,
+    FacturaVencida VARCHAR(45) DEFAULT 'NO',
+    idEmpleado INT,
+    idCliente INT,
+    idTienda INT,
+    FOREIGN KEY (idEmpleado) REFERENCES Empleado(idEmpleado),
+    FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente),
+    FOREIGN KEY (idTienda) REFERENCES Tienda(idTienda)
+);
+
+-- ==========================
+-- TABLA DETALLE FACTURA
+-- ==========================
+CREATE TABLE DetalleFactura (
+    idDetalleFactura INT AUTO_INCREMENT PRIMARY KEY,
+    idFactura INT,
+    idProducto INT,
+    Cantidad INT NOT NULL,
+    ValorUnitario DECIMAL(10,2) NOT NULL,
+    Descuento DECIMAL(10,2) DEFAULT 0,
+    IVA DECIMAL(10,2) DEFAULT 0,
+    FOREIGN KEY (idFactura) REFERENCES Factura(idFactura),
+    FOREIGN KEY (idProducto) REFERENCES Producto(idProducto)
+);
+
+-- ==========================
+-- TABLA PAGO
+-- ==========================
+CREATE TABLE Pago (
+    idPago INT AUTO_INCREMENT PRIMARY KEY,
+    Monto DECIMAL(10,2) NOT NULL,
+    TipoPago VARCHAR(45) NOT NULL,
+    idFactura INT,
+    FOREIGN KEY (idFactura) REFERENCES Factura(idFactura)
+);
+</code></pre>
+          <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-6">
+            <img src="creacion-tablas.png" alt="Captura de las tablas creadas en el gestor de BD." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+            <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre de archivo: <strong>creacion-tablas.png</strong>)</p>
+            <p class="text-xs text-slate-500 mt-1">Fecha y hora de ejecución: <span class="font-mono">2025-08-27 10:46:02</span> (actualizar)</p>
+          </div>
+        </div>
+
+        <div id="sub-panel-impl-inserts" class="sub-panel hidden space-y-6">
+          <h3 class="font-bold text-lg">Paso 3: Poblar las Tablas con Datos</h3>
+          <p class="text-slate-700">Finalmente, se usan sentencias <code>INSERT INTO</code> para llenar las tablas. El orden es crucial: se debe insertar primero en las tablas que no tienen dependencias y luego en las que sí las tienen.</p>
+          <pre><code class="language-sql">-- =========================================
+-- INSERTS PARA TABLA TIENDA
+-- =========================================
+INSERT INTO Tienda (NombreTienda, Direccion, Descripcion) VALUES
+('Zapatería Central', 'Calle 10 #25-30, Bogotá', 'Sucursal principal en Bogotá'),
+('Calzado Express', 'Carrera 45 #80-12, Medellín', 'Sucursal Medellín'),
+('Fashion Shoes', 'Av. Siempre Viva #123, Cali', 'Sucursal en Cali');
+
+-- =========================================
+-- INSERTS PARA TABLA CLIENTE
+-- =========================================
+INSERT INTO Cliente (Nombres, PrimerApellido, SegundoApellido, NIT, Correo, Telefono) VALUES
+('Carlos', 'Gómez', 'Martínez', '900123456', 'carlos.gomez@example.com', '3001112233'),
+('María', 'López', 'Fernández', '901234567', 'maria.lopez@example.com', '3102223344'),
+('Andrés', 'Pérez', 'Rodríguez', '902345678', 'andres.perez@example.com', '3203334455');
+
+-- =========================================
+-- INSERTS PARA TABLA EMPLEADO
+-- =========================================
+INSERT INTO Empleado (Nombres, PrimerApellido, SegundoApellido, RolEmpleado, idTienda) VALUES
+('Laura', 'Ramírez', 'Suárez', 'Cajera', 1),
+('Jorge', 'Mendoza', 'Castro', 'Vendedor', 1),
+('Paola', 'Díaz', 'Jiménez', 'Administrador', 2),
+('Luis', 'Ortiz', 'García', 'Vendedor', 3);
+
+-- =========================================
+-- INSERTS PARA TABLA PROVEEDOR
+-- =========================================
+INSERT INTO Proveedor (Nombres, PrimerApellido, SegundoApellido, NIT, Telefono, Correo) VALUES
+('Pedro', 'Sánchez', 'Morales', '800123456', '3015556677', 'pedro.sanchez@proveedor.com'),
+('Ana', 'Torres', 'Castillo', '801234567', '3026667788', 'ana.torres@proveedor.com');
+
+-- =========================================
+-- INSERTS PARA TABLA PRODUCTO
+-- =========================================
+INSERT INTO Producto (NombreProducto, Descripcion, Categoria, Marca, Talla, Color, SKU, Precio, Estado) VALUES
+('Zapatilla Running', 'Calzado deportivo para correr', 'Deportivo', 'Nike', '42', 'Negro', 'SKU001', 250000, 'Activo'),
+('Zapato Formal Hombre', 'Zapato de cuero elegante', 'Formal', 'Clarks', '40', 'Café', 'SKU002', 320000, 'Activo'),
+('Sandalia Mujer', 'Sandalia casual para dama', 'Casual', 'Adidas', '37', 'Beige', 'SKU003', 150000, 'Activo'),
+('Botas Hombre', 'Bota de cuero resistente', 'Casual', 'Timberland', '43', 'Marrón', 'SKU004', 450000, 'Activo');
+
+-- =========================================
+-- INSERTS PARA TABLA INVENTARIO
+-- =========================================
+INSERT INTO Inventario (idTienda, idProducto, CantidadDisponible) VALUES
+(1, 1, 15),
+(1, 2, 10),
+(2, 3, 20),
+(3, 4, 8);
+
+-- =========================================
+-- INSERTS PARA TABLA COMPRA PRODUCTO
+-- =========================================
+INSERT INTO CompraProducto (FechaCompra, SubTotal, ValorImpuestos, TotalCompra, idTienda, idProveedor) VALUES
+('2025-08-01', 600000, 114000, 714000, 1, 1),
+('2025-08-05', 450000, 85500, 535500, 2, 2);
+
+-- =========================================
+-- INSERTS PARA TABLA DETALLE COMPRA PRODUCTOS
+-- =========================================
+INSERT INTO DetalleCompraProductos (idCompraProducto, idProducto, Cantidad, PrecioUnidad) VALUES
+(1, 1, 10, 240000),
+(1, 2, 5, 300000),
+(2, 3, 15, 140000),
+(2, 4, 5, 430000);
+
+-- =========================================
+-- INSERTS PARA TABLA FACTURA
+-- =========================================
+INSERT INTO Factura (FechaHora, SubTotal, Descuento, Total, FacturaVencida, idEmpleado, idCliente, idTienda) VALUES
+('2025-08-20 14:30:00', 500000, 20000, 480000, 'NO', 1, 1, 1),
+('2025-08-21 16:00:00', 320000, 0, 320000, 'NO', 2, 2, 1),
+('2025-08-22 11:15:00', 600000, 30000, 570000, 'NO', 3, 3, 2);
+
+-- =========================================
+-- INSERTS PARA TABLA DETALLE FACTURA
+-- =========================================
+INSERT INTO DetalleFactura (idFactura, idProducto, Cantidad, ValorUnitario, Descuento, IVA) VALUES
+(1, 1, 2, 250000, 20000, 47500),
+(2, 2, 1, 320000, 0, 60800),
+(3, 3, 3, 150000, 30000, 85500);
+
+-- =========================================
+-- INSERTS PARA TABLA PAGO
+-- =========================================
+INSERT INTO Pago (Monto, TipoPago, idFactura) VALUES
+(480000, 'Tarjeta Crédito', 1),
+(320000, 'Efectivo', 2),
+(570000, 'Transferencia', 3);
+</code></pre>
+          <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-6">
+            <img src="insercion-datos.png" alt="Captura de la ejecución de los inserts." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+            <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre de archivo: <strong>insercion-datos.png</strong>)</p>
+            <p class="text-xs text-slate-500 mt-1">Fecha y hora de ejecución: <span class="font-mono">2025-08-27 10:48:30</span> (actualizar)</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONSULTAS -->
+    <section id="panel-consultas" class="panel hidden">
+       <div class="card-fun p-4 sm:p-6">
+        <h2 class="text-2xl font-black mb-4">🔍 Consultas SQL Adaptadas</h2>
+
+        <div class="flex flex-wrap gap-2 sm:gap-3 mb-6 border-b-2 border-black pb-4">
+          <button data-sub-tab="cq-simples" class="sub-tab-btn tab-btn tab-active rounded-xl px-4 py-2 text-sm">Simples</button>
+          <button data-sub-tab="cq-intermedias" class="sub-tab-btn tab-btn rounded-xl px-4 py-2 text-sm">Intermedias</button>
+          <button data-sub-tab="cq-avanzadas" class="sub-tab-btn tab-btn rounded-xl px-4 py-2 text-sm">Avanzadas y Actualización</button>
+        </div>
+
+        <!-- Sub-panel Consultas Simples -->
+        <div id="sub-panel-cq-simples" class="sub-panel space-y-6">
+          <h3 class="font-bold text-lg">1. Consultas Simples</h3>
+          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
+            <p class="text-slate-700 mb-2 font-semibold">1.1. Ver todos los clientes:</p>
+            <pre><code class="language-sql">SELECT * FROM Cliente;</code></pre>
+             <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+               <img src="consulta-simple-1.png" alt="Resultado de ver todos los clientes." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-simple-1.png</strong>)</p>
+             </div>
+          </div>
+          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
+            <p class="text-slate-700 mb-2 font-semibold">1.2. Buscar un cliente por nombre:</p>
+            <pre><code class="language-sql">SELECT * FROM Cliente WHERE Nombres LIKE '%Carlos%';</code></pre>
+            <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+               <img src="consulta-simple-2.png" alt="Resultado de buscar un cliente." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-simple-2.png</strong>)</p>
+             </div>
+          </div>
+        </div>
+
+        <!-- Sub-panel Consultas Intermedias -->
+        <div id="sub-panel-cq-intermedias" class="sub-panel hidden space-y-6">
+          <h3 class="font-bold text-lg">2. Consultas Intermedias</h3>
+          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
+            <p class="text-slate-700 mb-2 font-semibold">2.1. Mostrar todas las facturas con su cliente:</p>
+            <pre><code class="language-sql">SELECT 
+    f.idFactura, 
+    CONCAT(c.Nombres, ' ', c.PrimerApellido) AS Cliente, 
+    f.FechaHora, 
+    f.Total
+FROM Factura f
+JOIN Cliente c ON f.idCliente = c.idCliente;</code></pre>
+            <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+               <img src="consulta-intermedia-1.png" alt="Resultado de facturas con clientes." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-intermedia-1.png</strong>)</p>
+             </div>
+          </div>
+          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
+            <p class="text-slate-700 mb-2 font-semibold">2.2. Mostrar el detalle de una factura específica:</p>
+            <pre><code class="language-sql">SELECT 
+    f.idFactura,
+    CONCAT(c.Nombres, ' ', c.PrimerApellido) AS Cliente,
+    p.NombreProducto AS Producto,
+    df.Cantidad,
+    df.ValorUnitario
+FROM Factura f
+JOIN Cliente c ON f.idCliente = c.idCliente
+JOIN DetalleFactura df ON f.idFactura = df.idFactura
+JOIN Producto p ON df.idProducto = p.idProducto
+WHERE f.idFactura = 1;</code></pre>
+            <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+               <img src="consulta-intermedia-2.png" alt="Resultado del detalle de una factura." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-intermedia-2.png</strong>)</p>
+             </div>
+          </div>
+        </div>
+        
+        <!-- Sub-panel Consultas Avanzadas -->
+        <div id="sub-panel-cq-avanzadas" class="sub-panel hidden space-y-6">
+          <h3 class="font-bold text-lg">3. Consultas Avanzadas y de Actualización</h3>
+          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
+            <p class="text-slate-700 mb-2 font-semibold">3.1. Clientes con mayor gasto:</p>
+            <pre><code class="language-sql">SELECT 
+    CONCAT(c.Nombres, ' ', c.PrimerApellido) AS Cliente, 
+    SUM(f.Total) AS GastoTotal
+FROM Cliente c
+JOIN Factura f ON c.idCliente = f.idCliente
+GROUP BY Cliente
+ORDER BY GastoTotal DESC;</code></pre>
+            <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+               <img src="consulta-avanzada-1.png" alt="Resultado de clientes con mayor gasto." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-avanzada-1.png</strong>)</p>
+             </div>
+          </div>
+          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
+            <p class="text-slate-700 mb-2 font-semibold">3.2. Producto más vendido:</p>
+            <pre><code class="language-sql">SELECT 
+    p.NombreProducto, 
+    SUM(df.Cantidad) AS CantidadVendida
+FROM DetalleFactura df
+JOIN Producto p ON df.idProducto = p.idProducto
+GROUP BY p.NombreProducto
+ORDER BY CantidadVendida DESC
+LIMIT 1;</code></pre>
+            <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+               <img src="consulta-avanzada-2.png" alt="Resultado del producto más vendido." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-avanzada-2.png</strong>)</p>
+             </div>
+          </div>
+          <div class="bg-white/50 p-4 rounded-xl border-2 border-black/50">
+            <p class="text-slate-700 mb-2 font-semibold">3.3. Actualizar inventario después de una venta:</p>
+            <pre><code class="language-sql">-- Primero, consultamos el stock actual para ver el cambio
+SELECT CantidadDisponible FROM Inventario WHERE idProducto = 1 AND idTienda = 1;
+
+-- Ejecutamos la actualización (simulando que se vendieron 2 unidades)
+UPDATE Inventario 
+SET CantidadDisponible = CantidadDisponible - 2 
+WHERE idProducto = 1 AND idTienda = 1;
+
+-- Volvemos a consultar para verificar el nuevo stock
+SELECT CantidadDisponible FROM Inventario WHERE idProducto = 1 AND idTienda = 1;</code></pre>
+            <div class="text-center bg-slate-100 p-4 rounded-2xl border-2 border-black shadow-pop mt-4">
+               <img src="consulta-update.png" alt="Resultado de la actualización de inventario." class="mx-auto rounded-lg shadow-lg mb-2 w-full max-w-2xl">
+               <p class="text-sm text-slate-600 font-semibold mt-3">(Reemplaza esta imagen. Nombre: <strong>consulta-update.png</strong>)</p>
+             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXTRAS -->
+    <section id="panel-extras" class="panel hidden">
+      <div class="card-fun p-4 sm:p-6">
+        <h2 class="text-2xl font-black mb-4">💡 ¡Pon a Prueba tus Conocimientos!</h2>
+        
+        <div class="flex flex-wrap gap-2 sm:gap-3 mb-6 border-b-2 border-black pb-4">
+          <button data-sub-tab="ex-desafio1" class="sub-tab-btn tab-btn tab-active rounded-xl px-4 py-2 text-sm">Desafío 1: Nuevo Cliente</button>
+          <button data-sub-tab="ex-desafio2" class="sub-tab-btn tab-btn rounded-xl px-4 py-2 text-sm">Desafío 2: Venta Completa</button>
+        </div>
+
+        <div id="sub-panel-ex-desafio1" class="sub-panel space-y-6">
+          <h3 class="font-bold text-lg">Registrar un Nuevo Cliente</h3>
+          <p class="text-slate-700 mb-4">Tu misión es registrar a la clienta <strong>Diana Vargas Luna</strong> en la base de datos. Utiliza una sentencia <code>INSERT INTO</code> para añadir su información en la tabla <code>Cliente</code>.</p>
+          <ul class="list-disc pl-5 space-y-1 text-slate-800">
+            <li><strong>Nombres:</strong> Diana</li>
+            <li><strong>PrimerApellido:</strong> Vargas</li>
+            <li><strong>SegundoApellido:</strong> Luna</li>
+            <li><strong>NIT:</strong> 903456789</li>
+            <li><strong>Correo:</strong> diana.vargas@email.com</li>
+            <li><strong>Telefono:</strong> 3158889900</li>
+          </ul>
+          <aside class="aside-card rounded-2xl shadow-pop p-4 sm:p-6 mt-6">
+            <h3 class="font-bold text-lg mb-3">Pistas Clave</h3>
+            <div class="text-sm text-slate-800 mt-2 space-y-2">
+              <p>🤔 ¿Necesitas especificar el <code>idCliente</code>? ¿Por qué sí o por qué no?</p>
+              <p>⚠️ Recuerda que los valores de texto (VARCHAR) deben ir entre comillas simples (<code>'texto'</code>).</p>
+            </div>
+          </aside>
+        </div>
+
+        <div id="sub-panel-ex-desafio2" class="sub-panel hidden space-y-6">
+          <h3 class="font-bold text-lg">Registrar una Venta Completa</h3>
+          <p class="text-slate-700 mb-4">Este es más avanzado. La clienta <strong>Diana Vargas</strong> (la que acabas de registrar) realizó una compra. Debes registrar toda la transacción, lo que implica insertar datos en <strong>tres tablas diferentes</strong>.</p>
+          <ol class="list-decimal pl-5 space-y-4 text-slate-800">
+            <li>
+              <strong>Insertar la cabecera en <code>Factura</code>:</strong>
+              <ul class="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>Cliente:</strong> Diana Vargas (usa el ID que se autogeneró).</li>
+                <li><strong>Empleado:</strong> Jorge Mendoza (ID: 2).</li>
+                <li><strong>Tienda:</strong> Zapatería Central (ID: 1).</li>
+                <li><strong>FechaHora:</strong> Usa la fecha y hora actual.</li>
+                <li><strong>Total:</strong> 550000.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Insertar los productos en <code>DetalleFactura</code>:</strong>
+              <ul class="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>Producto 1:</strong> 'Sandalia Mujer' (ID: 3), Cantidad: 2.</li>
+                <li><strong>Producto 2:</strong> 'Zapatilla Running' (ID: 1), Cantidad: 1.</li>
+                <li>Recuerda usar el <code>idFactura</code> que se generó en el paso anterior.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Insertar el pago en <code>Pago</code>:</strong>
+              <ul class="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>Monto:</strong> 550000.</li>
+                <li><strong>TipoPago:</strong> 'Efectivo'.</li>
+                <li>También necesita el <code>idFactura</code>.</li>
+              </ul>
+            </li>
+          </ol>
+           <aside class="aside-card rounded-2xl shadow-pop p-4 sm:p-6 mt-6">
+            <h3 class="font-bold text-lg mb-3">Pistas Clave</h3>
+            <div class="text-sm text-slate-800 mt-2 space-y-2">
+              <p>🔄 El <strong>orden</strong> de las inserciones es fundamental. ¿Cuál tabla depende de cuál?</p>
+              <p>🔍 ¿Cómo puedes averiguar el <code>idCliente</code> y el <code>idFactura</code> que se acaban de generar para usarlos en las siguientes inserciones?</p>
+            </div>
+          </aside>
+        </div>
+        
+        <details class="bg-amber-100/50 p-4 rounded-2xl border-2 border-black transition-all mt-8">
+          <summary class="font-bold text-lg cursor-pointer hover:text-brand-600">¿Necesitas ayuda? Haz clic aquí para ver las soluciones</summary>
+          <div class="mt-4 pt-4 border-t border-brand-300">
+            <h3 class="font-bold mb-2">Solución Desafío 1:</h3>
+            <pre><code class="language-sql">INSERT INTO Cliente (Nombres, PrimerApellido, SegundoApellido, NIT, Correo, Telefono)
+VALUES ('Diana', 'Vargas', 'Luna', '903456789', 'diana.vargas@email.com', '3158889900');</code></pre>
+            <h3 class="font-bold mt-6 mb-2">Solución Desafío 2:</h3>
+            <p class="text-sm text-slate-700 mb-3">Nota: Asumimos que el <code>idCliente</code> de Diana es 4 y que el <code>idFactura</code> generado será 4. En un sistema real, obtendrías estos IDs dinámicamente.</p>
+            <pre><code class="language-sql">-- Paso A: Insertar en Factura
+INSERT INTO Factura (FechaHora, SubTotal, Total, idEmpleado, idCliente, idTienda)
+VALUES (NOW(), 550000, 550000, 2, 4, 1);
+
+-- Paso B: Insertar en DetalleFactura (usando el ID de la factura recién creada, ej: 4)
+INSERT INTO DetalleFactura (idFactura, idProducto, Cantidad, ValorUnitario)
+VALUES
+(4, 3, 2, 150000),
+(4, 1, 1, 250000);
+
+-- Paso C: Insertar en Pago
+INSERT INTO Pago (Monto, TipoPago, idFactura)
+VALUES (550000, 'Efectivo', 4);</code></pre>
+          </div>
+        </details>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -613,7 +1133,7 @@
     const $ = (q, el=document)=> el.querySelector(q);
     const $$ = (q, el=document)=> [...el.querySelectorAll(q)];
 
-    // === Datos base: ventas consolidadas (violando 1FN) ===
+    // === Datos base para la demostración de normalización ===
     const originalRows = [
       { factura:'F-1001', fecha:'2025-08-01 10:32', cliA:'Celi Jiménez', cliN:'Andrés Felipe', empN:'María', empA:'Gómez', suc:'Centro', productos:'SKU-ABC-001:38:Negro:159000:2 | SKU-XYZ-110:40:Blanco:199000:1' },
       { factura:'F-1002', fecha:'2025-08-02 16:10', cliA:'Ramírez Pérez', cliN:'Claudia',      empN:'Carlos', empA:'Rubiano', suc:'Norte',  productos:'SKU-ABC-001:39:Negro:159000:1 | SKU-FFF-210:37:Rojo:129000:2' },
@@ -675,7 +1195,7 @@
       renderBody($('#tbody-2fn-b'), detalle, ['id_factura','item','sku','talla','color','precio_unidad','cantidad']);
     }
 
-        function to3FN(rows1){
+    function to3FN(rows1){
       const uniq = arr => [...new Set(arr)];
       const clients = uniq(rows1.map(r=>`${r.cliente}`));
       const empleados = uniq(rows1.map(r=>`${r.empleado}`));
@@ -729,23 +1249,36 @@
     };
 
     function switchTo(tab){
-      $$('.tab-btn').forEach(b=> b.classList.toggle('tab-active', b.dataset.tab===tab));
+      $$('.tab-btn:not(.sub-tab-btn)').forEach(b=> b.classList.toggle('tab-active', b.dataset.tab===tab));
       $$('.panel').forEach(p=>{ 
         if(p.id==='panel-'+tab){ 
           p.classList.remove('hidden'); 
           p.style.animation = 'none';
-          p.offsetHeight; // trigger reflow
+          p.offsetHeight;
           p.style.animation = 'slideIn 0.5s ease-out';
         } else { 
           p.classList.add('hidden'); 
         } 
       });
       
-      // Si la pestaña seleccionada es el diagrama, se ajusta automáticamente
-      if (tab === 'erd') {
-        resetERDView();
-      }
+      if (tab === 'erd') resetERDView();
       if(voiceEnabled) speakCurrentSummary();
+    }
+
+    function switchSubTab(subTabId, panelId) {
+      const container = $(`#${panelId}`);
+      if (!container) return;
+      $$('.sub-tab-btn', container).forEach(b => b.classList.toggle('tab-active', b.dataset.subTab === subTabId));
+      $$('.sub-panel', container).forEach(p => {
+        if (p.id === `sub-panel-${subTabId}`) {
+          p.classList.remove('hidden');
+          p.style.animation = 'none';
+          p.offsetHeight;
+          p.style.animation = 'fade-up .45s cubic-bezier(.2,.8,.2,1)';
+        } else {
+          p.classList.add('hidden');
+        }
+      });
     }
     
     function getPreferredVoice(){
@@ -774,15 +1307,18 @@
 
     function speakCurrentSummary(){
       if(!voiceEnabled) return;
-      const activeTab = $('.tab-active')?.dataset.tab || 'original';
+      const activeTab = $('.tab-active[data-tab]')?.dataset.tab || 'original';
       const panel = $('#panel-'+activeTab);
       let text = panel?.querySelector('[data-role="explanation"]')?.innerText.trim() || '';
       if(!text) text = ({
-          original: '¡Hola! Estamos viendo la tabla original con productos listados en una sola celda por factura, lo cual viola la primera forma normal. ¡Vamos a arreglarlo!',
-          '1fn': '¡Genial! En la primera forma normal, cada producto ocupa su propia fila. La clave es factura y item. Ya se ve mucho mejor, ¿verdad?',
-          '2fn': '¡Excelente progreso! En la segunda forma normal hemos separado la cabecera del detalle para eliminar las dependencias parciales.',
+          original: '¡Hola! Estamos viendo la tabla original, que viola la primera forma normal. ¡Vamos a arreglarlo!',
+          '1fn': '¡Genial! En la primera forma normal, cada producto ocupa su propia fila. Mucho mejor, ¿verdad?',
+          '2fn': '¡Excelente! En la segunda forma normal separamos la cabecera del detalle para eliminar dependencias parciales.',
           '3fn': '¡Lo logramos! En la tercera forma normal tenemos tablas maestras con claves foráneas. ¡La normalización está completa!',
-          erd: '¡Aquí está nuestro hermoso diagrama final! Muestra las relaciones entre facturas, clientes, empleados, sucursales y referencias de productos.'
+          erd: '¡Aquí está nuestro hermoso diagrama final! Muestra las relaciones entre todas las tablas.',
+          implementacion: 'Esta sección muestra la implementación práctica del modelo en SQL, desde crear la base de datos hasta insertar los datos.',
+          consultas: 'Ahora, exploremos la base de datos con diferentes tipos de consultas SQL, desde simples hasta avanzadas.',
+          extras: '¡Es tu turno! Esta sección te reta a escribir tus propias consultas SQL para poner a prueba lo que has aprendido.'
         })[activeTab] || 'Resumen no disponible.';
       speakText(text);
     }
@@ -803,9 +1339,10 @@
       const { image, viewport } = erdState;
       if (!image || !viewport || image.naturalWidth === 0 || viewport.clientWidth === 0) return;
       
-      erdState.scale = viewport.clientWidth / image.naturalWidth;
+      erdState.scale = Math.min(1, viewport.clientWidth / image.naturalWidth);
+      const scaledHeight = image.naturalHeight * erdState.scale;
       erdState.panX = 0;
-      erdState.panY = 0;
+      erdState.panY = (viewport.clientHeight - scaledHeight) / 2;
       updateERDTransform();
     };
 
@@ -844,20 +1381,30 @@
         updateERDTransform();
       });
       
-      // Observador para reajustar si cambia el tamaño de la ventana/contenedor
-      new ResizeObserver(resetERDView).observe(viewport);
+      if(erdState.viewport) new ResizeObserver(resetERDView).observe(erdState.viewport);
     }
 
     function init(){
       $('#year').textContent = new Date().getFullYear();
       renderOriginal(); render1FN(); render2FN(); render3FN();
-      $$('.tab-btn').forEach(b=> b.addEventListener('click', ()=> switchTo(b.dataset.tab)));
-      $('#btn-voice').addEventListener('click', ()=>{ 
+      
+      $$('.tab-btn:not(.sub-tab-btn)').forEach(b=> b.addEventListener('click', ()=> switchTo(b.dataset.tab)));
+      
+      $$('.sub-tab-btn').forEach(b => {
+        b.addEventListener('click', () => {
+          const subTabId = b.dataset.subTab;
+          const panel = b.closest('.panel');
+          if (panel) {
+            switchSubTab(subTabId, panel.id);
+          }
+        });
+      });
+
+      $('#btn-voice').addEventListener('click', (e)=>{ 
         voiceEnabled=true; 
         speakCurrentSummary(); 
-        // Añadir animación al botón cuando se activa
-        event.target.classList.add('animate-bounce');
-        setTimeout(() => event.target.classList.remove('animate-bounce'), 1000);
+        e.target.classList.add('animate-bounce');
+        setTimeout(() => e.target.classList.remove('animate-bounce'), 1000);
       });
       $('#btn-stop-voice').addEventListener('click', ()=> {
         window.speechSynthesis?.cancel();
@@ -869,8 +1416,10 @@
       window.speechSynthesis.onvoiceschanged = () => {
         const voices = window.speechSynthesis.getVoices();
         const select = $('#voice-select');
-        select.innerHTML = `<option value="">🎤 Voz (auto)</option>${voices.map(v => `<option value="${v.name}">${v.name} (${v.lang})</option>`).join('')}`;
-        selectedVoice = getPreferredVoice();
+        if(select){
+          select.innerHTML = `<option value="">🎤 Voz (auto)</option>${voices.map(v => `<option value="${v.name}">${v.name} (${v.lang})</option>`).join('')}`;
+          selectedVoice = getPreferredVoice();
+        }
       };
       init();
       setupInteractiveERD();
